@@ -6,6 +6,12 @@ export function useStoryGenerator() {
   const story = ref('');
   const isLoading = ref(false);
   const error = ref('');
+  const messages = ref([
+    {
+      role: 'system',
+      content: 'You are a creative storyteller who creates magical and engaging stories in chapters. Each response should continue the story in approximately 100-200 words.'
+    }
+  ]);
 
   const generateStory = async (prompt: string) => {
     try {
@@ -20,16 +26,8 @@ export function useStoryGenerator() {
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a creative storyteller who creates magical and engaging stories.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
+          messages: messages.value,
+          max_tokens: 150, // 限制生成的内容长度，适合100~200字
           temperature: 0.7
         })
       });
@@ -45,6 +43,7 @@ export function useStoryGenerator() {
       }
 
       story.value = data.choices[0].message.content;
+      console.log('story.value',story.value)
     } catch (e) {
       error.value = e instanceof Error 
         ? `Failed to generate story: ${e.message}`
@@ -53,6 +52,8 @@ export function useStoryGenerator() {
     } finally {
       isLoading.value = false;
     }
+
+    return story.value
   };
 
   return {
