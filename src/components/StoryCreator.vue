@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import CharacterSelection from './CharacterSelection.vue';
 import SceneSelection from './SceneSelection.vue';
 import ItemSelection from './ItemSelection.vue';
@@ -14,8 +14,10 @@ const selectedChoices = ref({
   items: [] as string[],
   storyPath: '',
 });
-const storyParts = ref([]); // 存储故事各个部分
-const { generateStory, isLoading, error } = useStoryGenerator();
+
+const storyParts = ref<string[]>([]); // 明确指定 storyParts 为 string 数组
+
+const { generateStory, error } = useStoryGenerator();
 
 const steps = [
   'Select a character',

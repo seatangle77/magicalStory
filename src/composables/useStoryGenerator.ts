@@ -12,8 +12,8 @@ export function useStoryGenerator() {
       content: 'You are a creative storyteller who creates magical and engaging stories in chapters. Each response should continue the story in approximately 100-200 words.'
     }
   ]);
-
-  const generateStory = async (prompt: string) => {
+ 
+  const generateStory = async (_prompt: string) => {
     try {
       isLoading.value = true;
       error.value = '';
