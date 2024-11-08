@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import CharacterSelection from './CharacterSelection.vue';
 import SceneSelection from './SceneSelection.vue';
 import ItemSelection from './ItemSelection.vue';
+import StoryPathSelection from './StoryPathSelection.vue'; // 导入新组件
 import StoryOutput from './StoryOutput.vue';
 import { useStoryGenerator } from '../composables/useStoryGenerator';
 
@@ -15,7 +16,7 @@ const selectedChoices = ref({
   storyPath: '',
 });
 
-const storyParts = ref<string[]>([]); // 明确指定 storyParts 为 string 数组
+const storyParts = ref<{ story: string, isFinal: boolean }[]>([]);
 
 const { generateStory, error } = useStoryGenerator();
 
@@ -29,6 +30,17 @@ const steps = [
   'Choose one more item for the climax',
 ];
 
+// 静态JSON数据，模拟每个步骤的GPT响应
+const staticResponses = {
+  character_creation: "Alex, a brave 10-year-old adventurer, steps into the mysterious forest with wide eyes, treating every twig and leaf as if it holds hidden magic.",
+  scene_selection: "As Alex enters the Mysterious Forest, the trees start whispering secrets, and some leaves begin to twirl in mid-air like tiny dancers.",
+  item_selection_1: "Alex finds a magic wand. When waved, it makes all the trees briefly turn into candy canes, making Alex laugh.",
+  item_selection_2: "Alex picks up a treasure chest, which opens with a tiny dancing dragon singing a high-pitched tune.",
+  story_development: "Out hops Professor Snugglefluff, a plump, purple rabbit with glasses, who proudly claims to be the smartest rabbit in the forest.",
+  climax: "Alex and Professor Snugglefluff join a group of magical ducks in a 'quack dance,' spinning and laughing.",
+  ending: "As the sun sets, Alex sits by the stream with Professor Snugglefluff, reflecting on the adventure, feeling braver and grateful for the magic."
+};
+
 const startAdventure = () => {
   isStarted.value = true;
 };
@@ -39,21 +51,41 @@ const proceedToNextStep = () => {
 
 // 处理选择并发送Prompt给接口获取故事片段
 const handleSelection = async (type: string, choice: string) => {
+  let storyPart = '';
+
   if (type === 'character') {
     selectedChoices.value.character = choice;
-    await requestStoryPart(`The main character is ${choice}. They start their adventure...`); // 第一个故事片段的Prompt
+    storyPart = staticResponses.character_creation;
+
+    //await requestStoryPart(`The main character is ${choice}. They start their adventure...`); // 第一个故事片段的Prompt
   }
   if (type === 'scene') {
     selectedChoices.value.scene = choice;
-    await requestStoryPart(`${selectedChoices.value.character} arrives at the ${choice} where magical things happen...`); // 第二个故事片段的Prompt
+    storyPart = staticResponses.scene_selection;
+ 
+    //await requestStoryPart(`${selectedChoices.value.character} arrives at the ${choice} where magical things happen...`); // 第二个故事片段的Prompt
   }
   if (type === 'item') {
     selectedChoices.value.items.push(choice);
-    await requestStoryPart(`With a magical ${choice}, the adventure continues...`); // 针对物品的Prompt
+    const itemIndex = selectedChoices.value.items.length;
+    storyPart = staticResponses[`item_selection_${itemIndex}`];
+    
+    //await requestStoryPart(`With a magical ${choice}, the adventure continues...`); // 针对物品的Prompt
   }
   if (type === 'storyPath') {
     selectedChoices.value.storyPath = choice;
-    await requestStoryPart(`The story takes an exciting turn as ${selectedChoices.value.character} decides to ${choice}...`); // 针对故事路径的Prompt
+    storyPart = staticResponses.story_development;
+
+    //await requestStoryPart(`The story takes an exciting turn as ${selectedChoices.value.character} decides to ${choice}...`); // 针对故事路径的Prompt
+  }
+
+    // 检查 storyPart 是否为空，以便将其添加到 storyParts 数组中
+    if (storyPart) {
+    storyParts.value.push({ story: storyPart, isFinal: false });
+
+    console.log('Current story parts:', storyParts.value); // 检查 storyParts 是否更新
+  } else {
+    console.error('Story part is empty or undefined.');
   }
 
   if (currentStep.value < steps.length - 1) {
@@ -65,7 +97,6 @@ const handleSelection = async (type: string, choice: string) => {
 
 // 请求接口生成故事片段
 const requestStoryPart = async (prompt: string) => {
-  console.log("await generateStory(prompt)",await generateStory(prompt))
   const part = await generateStory(prompt); // 获取生成的故事内容
   console.log('Generated part:', part); // 检查 part 的值
   if (part && part.trim()) {  // 确保 part 不为空或 undefined
@@ -79,7 +110,8 @@ const requestStoryPart = async (prompt: string) => {
 const generateFullStory = async () => {
   const fullPrompt = `Character: ${selectedChoices.value.character}, Scene: ${selectedChoices.value.scene}, Items: ${selectedChoices.value.items.join(', ')}, Story Path: ${selectedChoices.value.storyPath}`;
   const fullStory = await generateStory(fullPrompt); // 发送完整Prompt请求完整故事
-  storyParts.value.push(fullStory); // 添加完整故事
+  storyParts.value.push({ story: fullStory, isFinal: true }); // 完整故事标记为 isFinal: true
+
 };
 </script>
 
@@ -94,8 +126,6 @@ const generateFullStory = async () => {
     <div v-else class="story-content">
       <!-- 左侧选择栏 -->
       <div class="left-panel">
-        <h2>{{ steps[currentStep] }}</h2>
-
         <CharacterSelection 
           v-if="currentStep === 0"
           @select="handleSelection('character', $event)" 
@@ -112,11 +142,10 @@ const generateFullStory = async () => {
           @select="handleSelection('item', $event)" 
         />
 
-        <div v-if="currentStep === 4">
-          <button @click="handleSelection('storyPath', 'explore')">Explore a new area</button>
-          <button @click="handleSelection('storyPath', 'interact')">Interact with a character</button>
-          <button @click="handleSelection('storyPath', 'solve')">Solve a puzzle</button>
-        </div>
+        <StoryPathSelection 
+          v-if="currentStep === 4"
+          @select="handleSelection('storyPath', $event)" 
+        />
 
         <div v-if="error" class="error">{{ error }}</div>
       </div>
@@ -124,15 +153,19 @@ const generateFullStory = async () => {
       <!-- 右侧故事内容显示栏 -->
       <div class="right-panel">
         <h2>Story Progress</h2>
-        <StoryOutput v-for="(part, index) in storyParts" :key="index" :story="part" />
-      </div>
+        <StoryOutput 
+          v-for="(part, index) in storyParts" 
+          :key="index" 
+          :story="part.story" 
+          :isFinal="part.isFinal" 
+        />      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .story-app {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
