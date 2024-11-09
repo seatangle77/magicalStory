@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import CharacterSelection from './CharacterSelection.vue';
 import SceneSelection from './SceneSelection.vue';
 import ItemSelection from './ItemSelection.vue';
-import StoryPathSelection from './StoryPathSelection.vue'; // 导入新组件
+import StoryPathSelection from './StoryPathSelection.vue'; 
 import StoryOutput from './StoryOutput.vue';
 import { useStoryGenerator } from '../composables/useStoryGenerator';
 
@@ -24,18 +24,29 @@ const steps = [
   'Select a character',
   'Choose a scene to explore',
   'Select your first magical item',
-  'Pick a second item for the adventure',
   'Choose your story path (explore, interact, or solve)',
   'Pick another item',
   'Choose one more item for the climax',
 ];
+
+// 故事背景Prompt，将用于每一步的生成上下文
+const initialPrompt = `
+You are a children’s story generator, designed to create fun, humorous, and educational magical adventure stories specifically for children under 12. Each story should have a magical tone similar to Harry Potter, with humorous twists inspired by the Judy Moody series.
+Instructions:
+1. The story should be divided into chapters, with each response generating one chapter at a time. Each chapter should be approximately 100-200 words, advancing the story in a structured, engaging way.
+2. Keep the content magical, lighthearted, and humorous. Avoid overly complex or serious themes.
+3. Use concise, engaging descriptions to keep the story interesting and accessible to young readers.
+4. Avoid sensitive or controversial topics, such as religion or politics.
+5. Ensure a smooth flow from one chapter to the next, building up to a climax and ending with a warm, satisfying conclusion.
+6. Avoid rushed endings: After reaching the story’s climax, provide a gradual resolution in the final chapters.
+`;
+
 
 // 静态JSON数据，模拟每个步骤的GPT响应
 const staticResponses = {
   character_creation: "Alex, a brave 10-year-old adventurer, steps into the mysterious forest with wide eyes, treating every twig and leaf as if it holds hidden magic.",
   scene_selection: "As Alex enters the Mysterious Forest, the trees start whispering secrets, and some leaves begin to twirl in mid-air like tiny dancers.",
   item_selection_1: "Alex finds a magic wand. When waved, it makes all the trees briefly turn into candy canes, making Alex laugh.",
-  item_selection_2: "Alex picks up a treasure chest, which opens with a tiny dancing dragon singing a high-pitched tune.",
   story_development: "Out hops Professor Snugglefluff, a plump, purple rabbit with glasses, who proudly claims to be the smartest rabbit in the forest.",
   climax: "Alex and Professor Snugglefluff join a group of magical ducks in a 'quack dance,' spinning and laughing.",
   ending: "As the sun sets, Alex sits by the stream with Professor Snugglefluff, reflecting on the adventure, feeling braver and grateful for the magic."
@@ -55,63 +66,75 @@ const handleSelection = async (type: string, choice: string) => {
 
   if (type === 'character') {
     selectedChoices.value.character = choice;
-    storyPart = staticResponses.character_creation;
-
-    //await requestStoryPart(`The main character is ${choice}. They start their adventure...`); // 第一个故事片段的Prompt
+    //storyPart = staticResponses.character_creation;
+    await requestStoryPart(`The main character is ${choice}. They start their adventure...`); // 第一个故事片段的Prompt
   }
   if (type === 'scene') {
     selectedChoices.value.scene = choice;
-    storyPart = staticResponses.scene_selection;
+    //storyPart = staticResponses.scene_selection;
  
-    //await requestStoryPart(`${selectedChoices.value.character} arrives at the ${choice} where magical things happen...`); // 第二个故事片段的Prompt
+    await requestStoryPart(`${selectedChoices.value.character} arrives at the ${choice} where magical things happen...`); // 第二个故事片段的Prompt
   }
   if (type === 'item') {
     selectedChoices.value.items.push(choice);
     const itemIndex = selectedChoices.value.items.length;
-    storyPart = staticResponses[`item_selection_${itemIndex}`];
+    //storyPart = staticResponses[`item_selection_${itemIndex}`];
     
-    //await requestStoryPart(`With a magical ${choice}, the adventure continues...`); // 针对物品的Prompt
+    await requestStoryPart(`With a magical ${choice}, the adventure continues...`); // 针对物品的Prompt
   }
   if (type === 'storyPath') {
     selectedChoices.value.storyPath = choice;
-    storyPart = staticResponses.story_development;
+    //storyPart = staticResponses.story_development;
 
-    //await requestStoryPart(`The story takes an exciting turn as ${selectedChoices.value.character} decides to ${choice}...`); // 针对故事路径的Prompt
+    await requestStoryPart(`The story takes an exciting turn as ${selectedChoices.value.character} decides to ${choice}...`); // 针对故事路径的Prompt
   }
 
-    // 检查 storyPart 是否为空，以便将其添加到 storyParts 数组中
-    if (storyPart) {
-    storyParts.value.push({ story: storyPart, isFinal: false });
-
-    console.log('Current story parts:', storyParts.value); // 检查 storyParts 是否更新
+    // 在第5步生成故事结尾
+    if (currentStep.value === 5) {
+    await requestStoryEnding(); // 生成故事的结尾
   } else {
-    console.error('Story part is empty or undefined.');
-  }
-
-  if (currentStep.value < steps.length - 1) {
     proceedToNextStep();
-  } else {
-    await generateFullStory(); // 所有步骤完成后生成完整的故事
   }
 };
 
 // 请求接口生成故事片段
-const requestStoryPart = async (prompt: string) => {
-  const part = await generateStory(prompt); // 获取生成的故事内容
-  console.log('Generated part:', part); // 检查 part 的值
-  if (part && part.trim()) {  // 确保 part 不为空或 undefined
-    storyParts.value.push(part); // 将返回的故事片段添加到 storyParts 中
-  } else {
-    console.error('No story part was generated.'); // 日志记录错误
+const requestStoryPart = async (newPrompt: string) => {
+  const previousStory = storyParts.value.map(part => part.story).join(' ');
+  const prompt = `${initialPrompt}\n\n${previousStory}\n\n${newPrompt}`.trim();
+
+  try {
+    const part = await generateStory(prompt);
+    console.log('Generated part:', part);
+
+    if (part && part.trim()) {
+      storyParts.value.push({ story: part, isFinal: false });
+    } else {
+      console.error('Story part is empty or undefined.');
+    }
+  } catch (error) {
+    console.error('Error generating story part:', error);
   }
 };
 
-// 完整生成故事
-const generateFullStory = async () => {
-  const fullPrompt = `Character: ${selectedChoices.value.character}, Scene: ${selectedChoices.value.scene}, Items: ${selectedChoices.value.items.join(', ')}, Story Path: ${selectedChoices.value.storyPath}`;
-  const fullStory = await generateStory(fullPrompt); // 发送完整Prompt请求完整故事
-  storyParts.value.push({ story: fullStory, isFinal: true }); // 完整故事标记为 isFinal: true
 
+
+// 请求生成故事的结尾
+const requestStoryEnding = async () => {
+  const previousStory = storyParts.value.map(part => part.story).join(' ');
+  const endingPrompt = `${initialPrompt}\n\n${previousStory}\n\nConclude the story with a warm and satisfying ending.`;
+
+  try {
+    const ending = await generateStory(endingPrompt);
+    console.log('Generated ending:', ending);
+
+    if (ending && ending.trim()) {
+      storyParts.value.push({ story: ending, isFinal: true });
+    } else {
+      console.error('Ending is empty or undefined.');
+    }
+  } catch (error) {
+    console.error('Error generating story ending:', error);
+  }
 };
 </script>
 
@@ -137,13 +160,13 @@ const generateFullStory = async () => {
         />
 
         <ItemSelection 
-          v-if="currentStep === 2 || currentStep === 3 || currentStep === 5 || currentStep === 6"
+          v-if="currentStep === 2 || currentStep === 4 || currentStep === 5"
           :disabledItems="selectedChoices.items"
           @select="handleSelection('item', $event)" 
         />
 
         <StoryPathSelection 
-          v-if="currentStep === 4"
+          v-if="currentStep === 3"
           @select="handleSelection('storyPath', $event)" 
         />
 
@@ -158,7 +181,12 @@ const generateFullStory = async () => {
           :key="index" 
           :story="part.story" 
           :isFinal="part.isFinal" 
-        />      </div>
+        />
+          <!-- 加载状态 -->
+          <div v-if="!storyParts.length && isStarted && currentStep > 0" class="loading">
+          Loading story part...
+        </div>      
+      </div>
     </div>
   </div>
 </template>
@@ -210,5 +238,32 @@ const generateFullStory = async () => {
 
 .error {
   color: red;
+}
+.loading {
+  font-size: 1.2rem;
+  color: #666;
+  text-align: center;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading::after {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-left: 0.5em;
+  border-radius: 50%;
+  border: 3px solid #42b883; /* 颜色可以根据需求调整 */
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

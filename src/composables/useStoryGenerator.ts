@@ -6,17 +6,21 @@ export function useStoryGenerator() {
   const story = ref('');
   const isLoading = ref(false);
   const error = ref('');
-  const messages = ref([
-    {
-      role: 'system',
-      content: 'You are a creative storyteller who creates magical and engaging stories in chapters. Each response should continue the story in approximately 100-200 words.'
-    }
-  ]);
+  const messages = ref([{
+    role: 'user',
+    content: '',
+  }]);
  
   const generateStory = async (_prompt: string) => {
     try {
       isLoading.value = true;
       error.value = '';
+
+            // 将新的用户消息添加到 messages 中
+            messages.value.push({
+              role: 'user',
+              content: _prompt
+            });
       
       const response = await fetch('/api/chat/completions', {
         method: 'POST',
@@ -25,9 +29,9 @@ export function useStoryGenerator() {
           'Authorization': `Bearer ${API_KEY}`
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4',
           messages: messages.value,
-          max_tokens: 150, // 限制生成的内容长度，适合100~200字
+          max_tokens: 100, // 
           temperature: 0.7
         })
       });
