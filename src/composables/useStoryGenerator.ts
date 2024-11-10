@@ -31,7 +31,6 @@ export function useStoryGenerator() {
         body: JSON.stringify({
           model: 'gpt-4',
           messages: messages.value,
-          max_tokens: 100, // 
           temperature: 0.7
         })
       });

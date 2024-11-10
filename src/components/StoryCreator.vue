@@ -31,9 +31,9 @@ const steps = [
 
 // 故事背景Prompt，将用于每一步的生成上下文
 const initialPrompt = `
-You are a children’s story generator, designed to create fun, humorous, and educational magical adventure stories specifically for children under 12. Each story should have a magical tone similar to Harry Potter, with humorous twists inspired by the Judy Moody series.
+You are a children’s story generator, designed to create fun, humorous, and educational magical adventure stories specifically for children under 10. Each story should have a magical tone similar to Harry Potter, with humorous twists inspired by the Judy Moody series.
 Instructions:
-1. The story should be divided into chapters, with each response generating one chapter at a time. Each chapter should be approximately 100-200 words, advancing the story in a structured, engaging way.
+1. The story should be divided into chapters, with each response generating one chapter at a time. Each chapter should be only 100 words, advancing the story in a structured, engaging way.
 2. Keep the content magical, lighthearted, and humorous. Avoid overly complex or serious themes.
 3. Use concise, engaging descriptions to keep the story interesting and accessible to young readers.
 4. Avoid sensitive or controversial topics, such as religion or politics.
@@ -193,7 +193,7 @@ const requestStoryEnding = async () => {
 
 <style scoped>
 .story-app {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
 }
 

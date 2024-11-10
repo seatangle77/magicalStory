@@ -7,7 +7,7 @@ const props = defineProps<{
 
 <template>
   <div v-if="story" class="story-output">
-    <h3 v-if="isFinal" class="story-title">Your Magical Story:</h3>
+    <h3 v-if="isFinal" class="story-title">Ending</h3>
     <div class="story-content">{{ story }}</div>
   </div>
 </template>
@@ -31,8 +31,7 @@ const props = defineProps<{
 
 .story-content {
   white-space: pre-wrap;
-  line-height: 1.6;
   color: #555;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 </style>
