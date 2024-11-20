@@ -1,19 +1,28 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits } from "vue";
 
 const props = defineProps<{ disabledItems: string[] }>();
-const emit = defineEmits(['select']);
+const emit = defineEmits(["select"]);
 
 const items = [
-  { name: 'Magic Wand', effect: 'Often casts spells incorrectly, such as turning trees into candy.' },
-  { name: 'Treasure Chest', effect: 'Makes funny noises when opened, sometimes releasing a dancing dragon.' },
-  { name: 'Rock', effect: 'Appears ordinary but rolls around on its own, startling the character.' },
-  { name: 'Flower', effect: 'Causes sneezing and makes the character’s voice sound like a duck.' },
-  { name: 'Key', effect: 'Plays silly music when unlocking doors, causing the character to fumble.' },
+  {
+    name: "Magic Wand",
+    effect: "Often casts spells incorrectly, such as turning trees into candy.",
+  },
+  {
+    name: "Treasure Chest",
+    effect:
+      "Makes funny noises when opened, sometimes releasing a dancing dragon.",
+  },
+  {
+    name: "Flower",
+    effect:
+      "Causes sneezing and makes the character’s voice sound like a duck.",
+  },
 ];
 
 const selectItem = (item: string) => {
-  emit('select', item);
+  emit("select", item);
 };
 </script>
 
@@ -22,8 +31,8 @@ const selectItem = (item: string) => {
     <h3 class="selection-title">Choose an Item</h3>
     <ul class="item-list">
       <li v-for="item in items" :key="item.name" class="item">
-        <button 
-          :disabled="props.disabledItems.includes(item.name)" 
+        <button
+          :disabled="props.disabledItems.includes(item.name)"
           @click="selectItem(item.name)"
           class="item-button"
         >

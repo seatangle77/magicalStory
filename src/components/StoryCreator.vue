@@ -18,24 +18,26 @@ const selectedChoices = ref({
 
 const storyParts = ref<{ story: string; isFinal: boolean }[]>([]);
 
-const { generateStory, generateImage, error } = useStoryGenerator();
+const { generateStory, error } = useStoryGenerator();
 
-const imageUrl = ref(""); // 存储生成的图片 URL
+//const imageUrl = ref(""); // 存储生成的图片 URL
+const imageUrl =
+  "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png"; // Default image URL
 
-const steps = [
-  "Select a character",
-  "Choose a scene to explore",
-  "Select your first magical item",
-  "Choose your story path (explore, interact, or solve)",
-  "Pick another item",
-  "Choose one more item for the climax",
-];
+// const steps = [
+//   "Select a character",
+//   "Choose a scene to explore",
+//   "Select your first magical item",
+//   "Choose your story path (explore, interact, or solve)",
+//   "Pick another item",
+//   "Choose one more item for the climax",
+// ];
 
 // 故事背景Prompt，将用于每一步的生成上下文
 const initialPrompt = `
 You are a children’s story generator, designed to create fun, humorous, and educational magical adventure stories specifically for children under 10. Each story should have a magical tone similar to Harry Potter, with humorous twists inspired by the Judy Moody series.
 Instructions:
-1. The story should be divided into chapters, with each response generating one chapter at a time. Each chapter should be only 100 words, advancing the story in a structured, engaging way.
+1. The story should be divided into chapters, with each response generating one chapter at a time. Each chapter should be only 30 words, advancing the story in a structured, engaging way.
 2. Keep the content magical, lighthearted, and humorous. Avoid overly complex or serious themes.
 3. Use concise, engaging descriptions to keep the story interesting and accessible to young readers.
 4. Avoid sensitive or controversial topics, such as religion or politics.
@@ -43,28 +45,28 @@ Instructions:
 6. Avoid rushed endings: After reaching the story’s climax, provide a gradual resolution in the final chapters.
 `;
 
-const initialImagePrompt = `
-      Create a whimsical, magical, and lighthearted illustration that would appeal to children under 10 years old. 
-      The scene should resemble a moment from a children’s story with a magical, warm atmosphere similar to Harry Potter, 
-      incorporating humorous and friendly elements inspired by the Judy Moody series. 
-      Use vibrant colors and engaging details that make the scene come alive.
-    `;
+// const initialImagePrompt = `
+//       Create a whimsical, magical, and lighthearted illustration that would appeal to children under 10 years old.
+//       The scene should resemble a moment from a children’s story with a magical, warm atmosphere similar to Harry Potter,
+//       incorporating humorous and friendly elements inspired by the Judy Moody series.
+//       Use vibrant colors and engaging details that make the scene come alive.
+//     `;
 
 // 静态JSON数据，模拟每个步骤的GPT响应
-const staticResponses = {
-  character_creation:
-    "Alex, a brave 10-year-old adventurer, steps into the mysterious forest with wide eyes, treating every twig and leaf as if it holds hidden magic.",
-  scene_selection:
-    "As Alex enters the Mysterious Forest, the trees start whispering secrets, and some leaves begin to twirl in mid-air like tiny dancers.",
-  item_selection_1:
-    "Alex finds a magic wand. When waved, it makes all the trees briefly turn into candy canes, making Alex laugh.",
-  story_development:
-    "Out hops Professor Snugglefluff, a plump, purple rabbit with glasses, who proudly claims to be the smartest rabbit in the forest.",
-  climax:
-    "Alex and Professor Snugglefluff join a group of magical ducks in a 'quack dance,' spinning and laughing.",
-  ending:
-    "As the sun sets, Alex sits by the stream with Professor Snugglefluff, reflecting on the adventure, feeling braver and grateful for the magic.",
-};
+// const staticResponses = {
+//   character_creation:
+//     "Alex, a brave 10-year-old adventurer, steps into the mysterious forest with wide eyes, treating every twig and leaf as if it holds hidden magic.",
+//   scene_selection:
+//     "As Alex enters the Mysterious Forest, the trees start whispering secrets, and some leaves begin to twirl in mid-air like tiny dancers.",
+//   item_selection_1:
+//     "Alex finds a magic wand. When waved, it makes all the trees briefly turn into candy canes, making Alex laugh.",
+//   story_development:
+//     "Out hops Professor Snugglefluff, a plump, purple rabbit with glasses, who proudly claims to be the smartest rabbit in the forest.",
+//   climax:
+//     "Alex and Professor Snugglefluff join a group of magical ducks in a 'quack dance,' spinning and laughing.",
+//   ending:
+//     "As the sun sets, Alex sits by the stream with Professor Snugglefluff, reflecting on the adventure, feeling braver and grateful for the magic.",
+// };
 
 const startAdventure = () => {
   isStarted.value = true;
@@ -76,7 +78,7 @@ const proceedToNextStep = () => {
 
 // 处理选择并发送Prompt给接口获取故事片段
 const handleSelection = async (type: string, choice: string) => {
-  let storyPart = "";
+  //let storyPart = "";
 
   if (type === "character") {
     selectedChoices.value.character = choice;
@@ -95,7 +97,7 @@ const handleSelection = async (type: string, choice: string) => {
   }
   if (type === "item") {
     selectedChoices.value.items.push(choice);
-    const itemIndex = selectedChoices.value.items.length;
+    //const itemIndex = selectedChoices.value.items.length;
     //storyPart = staticResponses[`item_selection_${itemIndex}`];
 
     await requestStoryPart(
@@ -112,7 +114,7 @@ const handleSelection = async (type: string, choice: string) => {
   }
 
   // 在第5步生成故事结尾
-  if (currentStep.value === 5) {
+  if (currentStep.value === 4) {
     await requestStoryEnding(); // 生成故事的结尾
   } else {
     proceedToNextStep();
@@ -163,18 +165,18 @@ const requestStoryEnding = async () => {
 };
 
 // 生成图像，使用 initialImagePrompt 和第一章节的内容
-const generateImageForFirstChapter = async () => {
-  if (storyParts.value.length > 0) {
-    const firstChapter = storyParts.value[0].story; // 获取第一个章节的内容
-    const imagePrompt = `${initialImagePrompt}\n\nIllustrate the following scene: ${firstChapter}`; // 合成图像 prompt
+// const generateImageForFirstChapter = async () => {
+//   if (storyParts.value.length > 0) {
+//     const firstChapter = storyParts.value[0].story; // 获取第一个章节的内容
+//     const imagePrompt = `${initialImagePrompt}\n\nIllustrate the following scene: ${firstChapter}`; // 合成图像 prompt
 
-    try {
-      imageUrl.value = await generateImage(imagePrompt); // 调用 generateImage 函数
-    } catch (e) {
-      console.error("Error generating image:", e);
-    }
-  }
-};
+//     try {
+//       imageUrl.value = await generateImage(imagePrompt); // 调用 generateImage 函数
+//     } catch (e) {
+//       console.error("Error generating image:", e);
+//     }
+//   }
+// };
 </script>
 
 <template>
@@ -201,7 +203,7 @@ const generateImageForFirstChapter = async () => {
         />
 
         <ItemSelection
-          v-if="currentStep === 2 || currentStep === 4 || currentStep === 5"
+          v-if="currentStep === 2 || currentStep === 4"
           :disabledItems="selectedChoices.items"
           @select="handleSelection('item', $event)"
         />
@@ -217,15 +219,15 @@ const generateImageForFirstChapter = async () => {
       <!-- 右侧故事内容显示栏 -->
       <div class="right-panel">
         <h2>Story Progress</h2>
-        <div v-if="imageUrl" class="image-container">
-          <img :src="imageUrl" alt="Generated Story Image" />
+        <div class="story-grid">
+          <StoryOutput
+            v-for="(part, index) in storyParts"
+            :key="index"
+            :story="part.story"
+            :imageUrl="imageUrl"
+            :isFinal="part.isFinal"
+          />
         </div>
-        <StoryOutput
-          v-for="(part, index) in storyParts"
-          :key="index"
-          :story="part.story"
-          :isFinal="part.isFinal"
-        />
         <!-- 加载状态 -->
         <div
           v-if="!storyParts.length && isStarted && currentStep > 0"
@@ -281,6 +283,12 @@ const generateImageForFirstChapter = async () => {
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two columns per row */
+  gap: 1rem;
 }
 
 .image-container {
