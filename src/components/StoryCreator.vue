@@ -19,14 +19,10 @@ const selectedChoices = ref({
 });
 
 const storyParts = ref<
-  { story: string; imageUrl?: string; isFinal: boolean }[]
+  { story: string; imageUrl?: string; isFinal: boolean; isLoading: boolean }[]
 >([]);
 
-const { generateStory, generateImage, error } = useStoryGenerator();
-
-//const imageUrl = ref(""); // 存储生成的图片 URL
-//const imageUrl =
-//  "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png"; // Default image URL
+const { generateStory, flux_generateImage, error } = useStoryGenerator();
 
 // 故事背景Prompt，将用于每一步的生成上下文
 const initialPrompt = `
@@ -35,7 +31,7 @@ You are a children's interactive adventure story game generator. Create fun, mag
 Instructions:
 
 1. The protagonist starts with Experience Points (XP): 3** and Health Points (HP): 3**, which changes as the story progresses.
-2. Each response generates **only one chapter** (30 words), logically advancing the story while updating XP and HP.
+2. Each response generates **only one chapter** (20 words), logically advancing the story while updating XP and HP.
 3. Ensure the logical continuity of the story.
 4. Endings vary based on XP and HP:
    - High XP and HP: A victorious ending.
@@ -133,6 +129,14 @@ const requestStoryPart = async (newPrompt: string) => {
   const previousStory = storyParts.value.map((part) => part.story).join(" ");
   const prompt = `${initialPrompt}\n\n${previousStory}\n\n${newPrompt}`.trim();
 
+  // 添加一个新的加载占位符
+  storyParts.value.push({
+    story: "",
+    imageUrl: "",
+    isFinal: false,
+    isLoading: true,
+  });
+
   try {
     const part = await generateStory(prompt);
     console.log("Generated part:", part);
@@ -141,19 +145,22 @@ const requestStoryPart = async (newPrompt: string) => {
       // 生成对应章节的图像
       const imagePrompt = part; // 使用故事片段直接作为图像提示
       const imageUrl =
-        (await generateImage(imagePrompt)) ||
+        (await flux_generateImage(imagePrompt)) ||
         "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
-      storyParts.value.push({ story: part, imageUrl, isFinal: false });
+      // 替换加载占位符为实际内容
+      storyParts.value[storyParts.value.length - 1] = {
+        story: part,
+        imageUrl,
+        isFinal: false,
+        isLoading: false,
+      };
     } else {
       console.error("Story part is empty or undefined.");
+      storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
     }
   } catch (error) {
     console.error("Error generating story part:", error);
-  }
-
-  // 检查是否已经生成了第一章节的内容
-  if (currentStep.value === 0 && storyParts.value.length === 1) {
-    //await generateImageForFirstChapter();  // 调用生成图片
+    storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
   }
 };
 
@@ -173,17 +180,32 @@ const requestStoryEnding = async () => {
     endingPrompt += `With balanced XP: ${XP} and HP: ${HP}, the character completes their adventure with mixed results, but a positive spirit!`;
   }
 
+  // 添加加载占位符
+  storyParts.value.push({
+    story: "",
+    imageUrl: "",
+    isFinal: true,
+    isLoading: true,
+  });
+
   try {
     const ending = await generateStory(endingPrompt);
     if (ending && ending.trim()) {
       const imagePrompt = ending; // 使用故事片段直接作为图像提示
       const imageUrl =
-        (await generateImage(imagePrompt)) ||
+        (await flux_generateImage(imagePrompt)) ||
         "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
-      storyParts.value.push({ story: ending, imageUrl, isFinal: true });
+      // 替换加载占位符为实际内容
+      storyParts.value[storyParts.value.length - 1] = {
+        story: ending,
+        imageUrl,
+        isFinal: true,
+        isLoading: false,
+      };
     }
   } catch (error) {
     console.error("Error generating story ending:", error);
+    storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
   }
 };
 </script>
@@ -237,13 +259,6 @@ const requestStoryEnding = async () => {
             :isFinal="part.isFinal"
             :isLoading="!part.story && !part.imageUrl"
           />
-        </div>
-        <!-- 加载状态 -->
-        <div
-          v-if="!storyParts.length && isStarted && currentStep > 0"
-          class="loading"
-        >
-          Loading story part...
         </div>
       </div>
     </div>
