@@ -1,6 +1,9 @@
 import { ref } from 'vue';
 
-const API_KEY = '77f41932a23a429cb68b84e3cd7c8321914531b95d8d48b8a21dc1f983ec51ea';
+const GPT_API_KEY = '77f41932a23a429cb68b84e3cd7c8321914531b95d8d48b8a21dc1f983ec51ea';
+const IMAGE_API_KEY = 'sk-YJ5YPHI4Kg6HgCCbSXUN6oXvmkPoV1h0AP9f3T5T9vbqwkGl';
+
+
 
 export function useStoryGenerator() {
   const story = ref('');
@@ -27,7 +30,7 @@ export function useStoryGenerator() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`
+          'Authorization': `Bearer ${GPT_API_KEY}`
         },
         body: JSON.stringify({
           model: 'gpt-4',
@@ -60,49 +63,55 @@ export function useStoryGenerator() {
     return story.value
   };
 
-    // 新增的 generateImage 方法，用于生成 DALL-E 3 图片
-    const generateImage = async (_prompt: string) => {
-      try {
-        isLoading.value = true;
-        error.value = '';
+  const generateImage = async (_prompt: string) => {
+    try {
+      isLoading.value = true;
+      error.value = '';
   
-        const response = await fetch('/api/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'dall-e-3',  // 指定为 DALL-E 3 模型
-            prompt: _prompt,
-            n: 1,               // 请求生成一张图片
-            size: '1024x1024'   // 设置图像大小，可根据需求调整
-          })
-        });
+      const formData = new FormData();
+      formData.append('prompt', _prompt);
+      formData.append('output_format', 'jpeg');
   
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.error?.message || `API request failed with status ${response.status}`);
-        }
+      const response = await fetch('https://api.stability.ai/v2beta/stable-image/generate/sd3', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${IMAGE_API_KEY}`,
+          Accept: 'application/json', // 请求返回 JSON 格式
+        },
+        body: formData, // FormData 自动设置 Content-Type
+      });
   
-        const data = await response.json();
-        if (!data.data?.[0]?.url) {
-          throw new Error('Invalid response format from API');
-        }
-  
-        image.value = data.data[0].url;
-        console.log('image.url', image.value);
-      } catch (e) {
-        error.value = e instanceof Error 
-          ? `Failed to generate image: ${e.message}`
-          : 'Failed to generate image. Please try again later.';
-        console.error('Image generation error:', e);
-      } finally {
-        isLoading.value = false;
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`${response.status}: ${errorData}`);
       }
   
-      return image.value;
-    };
+      // JSON 响应解析
+      const data = await response.json();
+      if (!data.image) {
+        throw new Error('Invalid response: missing image data');
+      }
+  
+      // 解码 Base64 数据为 Blob
+      const byteCharacters = atob(data.image);
+      const byteNumbers = Array.from(byteCharacters).map((char) => char.charCodeAt(0));
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+      const blobUrl = URL.createObjectURL(blob);
+  
+      image.value = blobUrl;
+      console.log('Image URL:', blobUrl);
+    } catch (e) {
+      error.value = e instanceof Error 
+        ? `Failed to generate image: ${e.message}`
+        : 'Failed to generate image. Please try again later.';
+      console.error('Image generation error:', e);
+    } finally {
+      isLoading.value = false;
+    }
+  
+    return image.value;
+  };
 
   return {
     generateStory,

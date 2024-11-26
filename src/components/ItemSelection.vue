@@ -14,11 +14,6 @@ const items = [
     effect:
       "Makes funny noises when opened, sometimes releasing a dancing dragon.",
   },
-  {
-    name: "Flower",
-    effect:
-      "Causes sneezing and makes the character’s voice sound like a duck.",
-  },
 ];
 
 const selectItem = (item: string) => {

@@ -14,59 +14,38 @@ const selectedChoices = ref({
   scene: "",
   items: [] as string[],
   storyPath: "",
+  XP: 3, // 初始经验值
+  HP: 3, // 初始生命值
 });
 
-const storyParts = ref<{ story: string; isFinal: boolean }[]>([]);
+const storyParts = ref<
+  { story: string; imageUrl?: string; isFinal: boolean }[]
+>([]);
 
-const { generateStory, error } = useStoryGenerator();
+const { generateStory, generateImage, error } = useStoryGenerator();
 
 //const imageUrl = ref(""); // 存储生成的图片 URL
-const imageUrl =
-  "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png"; // Default image URL
-
-// const steps = [
-//   "Select a character",
-//   "Choose a scene to explore",
-//   "Select your first magical item",
-//   "Choose your story path (explore, interact, or solve)",
-//   "Pick another item",
-//   "Choose one more item for the climax",
-// ];
+//const imageUrl =
+//  "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png"; // Default image URL
 
 // 故事背景Prompt，将用于每一步的生成上下文
 const initialPrompt = `
-You are a children’s story generator, designed to create fun, humorous, and educational magical adventure stories specifically for children under 10. Each story should have a magical tone similar to Harry Potter, with humorous twists inspired by the Judy Moody series.
+You are a children's interactive adventure story game generator. Create fun, magical, and humorous story games for children under 10. The tone should resemble Harry Potter, with twists inspired by Judy Moody.
+
 Instructions:
-1. The story should be divided into chapters, with each response generating one chapter at a time. Each chapter should be only 30 words, advancing the story in a structured, engaging way.
-2. Keep the content magical, lighthearted, and humorous. Avoid overly complex or serious themes.
-3. Use concise, engaging descriptions to keep the story interesting and accessible to young readers.
-4. Avoid sensitive or controversial topics, such as religion or politics.
-5. Ensure a smooth flow from one chapter to the next, building up to a climax and ending with a warm, satisfying conclusion.
-6. Avoid rushed endings: After reaching the story’s climax, provide a gradual resolution in the final chapters.
+
+1. The protagonist starts with Experience Points (XP): 3** and Health Points (HP): 3**, which changes as the story progresses.
+2. Each response generates **only one chapter** (30 words), logically advancing the story while updating XP and HP.
+3. Ensure the logical continuity of the story.
+4. Endings vary based on XP and HP:
+   - High XP and HP: A victorious ending.
+   - Low XP, high HP: A reflective recovery.
+   - Low XP and HP: A humorous and challenging ending.
+5. Maintain a lighthearted and magical tone. Avoid complex or sensitive themes.
+6. Avoid rushed endings. Gradually build toward a satisfying conclusion.
 `;
 
-// const initialImagePrompt = `
-//       Create a whimsical, magical, and lighthearted illustration that would appeal to children under 10 years old.
-//       The scene should resemble a moment from a children’s story with a magical, warm atmosphere similar to Harry Potter,
-//       incorporating humorous and friendly elements inspired by the Judy Moody series.
-//       Use vibrant colors and engaging details that make the scene come alive.
-//     `;
-
-// 静态JSON数据，模拟每个步骤的GPT响应
-// const staticResponses = {
-//   character_creation:
-//     "Alex, a brave 10-year-old adventurer, steps into the mysterious forest with wide eyes, treating every twig and leaf as if it holds hidden magic.",
-//   scene_selection:
-//     "As Alex enters the Mysterious Forest, the trees start whispering secrets, and some leaves begin to twirl in mid-air like tiny dancers.",
-//   item_selection_1:
-//     "Alex finds a magic wand. When waved, it makes all the trees briefly turn into candy canes, making Alex laugh.",
-//   story_development:
-//     "Out hops Professor Snugglefluff, a plump, purple rabbit with glasses, who proudly claims to be the smartest rabbit in the forest.",
-//   climax:
-//     "Alex and Professor Snugglefluff join a group of magical ducks in a 'quack dance,' spinning and laughing.",
-//   ending:
-//     "As the sun sets, Alex sits by the stream with Professor Snugglefluff, reflecting on the adventure, feeling braver and grateful for the magic.",
-// };
+//const initialImagePrompt = `Lighthouse on a cliff overlooking the ocean`;
 
 const startAdventure = () => {
   isStarted.value = true;
@@ -76,46 +55,74 @@ const proceedToNextStep = () => {
   currentStep.value++;
 };
 
-// 处理选择并发送Prompt给接口获取故事片段
 const handleSelection = async (type: string, choice: string) => {
-  //let storyPart = "";
+  let xpChange = 0; // 经验值变化
+  let hpChange = 0; // 生命值变化
 
   if (type === "character") {
     selectedChoices.value.character = choice;
-    //storyPart = staticResponses.character_creation;
+    xpChange = 1; // 选择角色增加少量经验值
     await requestStoryPart(
-      `The main character is ${choice}. They start their adventure...`
-    ); // 第一个故事片段的Prompt
+      `The main character is ${choice}, starting with XP: ${
+        selectedChoices.value.XP + xpChange
+      } and HP: ${
+        selectedChoices.value.HP + hpChange
+      }. They begin their journey...`
+    );
   }
   if (type === "scene") {
     selectedChoices.value.scene = choice;
-    //storyPart = staticResponses.scene_selection;
+
+    // 场景选择影响较大
+    xpChange = Math.floor(Math.random() * 2) + 1; // 1~2点经验值
+    hpChange = -Math.floor(Math.random() * 2); // 0~1点生命值减少
 
     await requestStoryPart(
-      `${selectedChoices.value.character} arrives at the ${choice} where magical things happen...`
-    ); // 第二个故事片段的Prompt
+      `${selectedChoices.value.character} enters the ${choice}. Magical challenges await, affecting XP and HP...`
+    );
   }
   if (type === "item") {
     selectedChoices.value.items.push(choice);
-    //const itemIndex = selectedChoices.value.items.length;
-    //storyPart = staticResponses[`item_selection_${itemIndex}`];
+
+    // 物品可能恢复生命值或增加经验值
+    const isHealingItem = Math.random() > 0.5; // 50% 概率恢复生命值
+    if (isHealingItem) {
+      hpChange = Math.floor(Math.random() * 2) + 1; // 1~2点生命值
+    } else {
+      xpChange = Math.floor(Math.random() * 3) + 1; // 1~3点经验值
+    }
 
     await requestStoryPart(
-      `With a magical ${choice}, the adventure continues...`
-    ); // 针对物品的Prompt
+      `With the magical ${choice}, the character gains XP: ${
+        selectedChoices.value.XP + xpChange
+      }, and HP: ${
+        selectedChoices.value.HP + hpChange
+      }. The adventure continues...`
+    );
   }
   if (type === "storyPath") {
     selectedChoices.value.storyPath = choice;
-    //storyPart = staticResponses.story_development;
+
+    // 路径选择对 XP 和 HP 的影响显著
+    xpChange = Math.floor(Math.random() * 4) + 1; // 1~4点经验值
+    hpChange = -Math.floor(Math.random() * 3); // 0~2点生命值减少
 
     await requestStoryPart(
-      `The story takes an exciting turn as ${selectedChoices.value.character} decides to ${choice}...`
-    ); // 针对故事路径的Prompt
+      `Choosing to ${choice}, the character's XP increases to ${
+        selectedChoices.value.XP + xpChange
+      }, but HP drops to ${selectedChoices.value.HP + hpChange}.`
+    );
   }
 
-  // 在第5步生成故事结尾
-  if (currentStep.value === 4) {
-    await requestStoryEnding(); // 生成故事的结尾
+  // 更新状态
+  selectedChoices.value.XP += xpChange;
+  selectedChoices.value.HP += hpChange;
+
+  // 检查提前结束条件
+  if (selectedChoices.value.HP <= 0) {
+    await requestStoryEnding(); // 提前结束冒险
+  } else if (currentStep.value === 4) {
+    await requestStoryEnding(); // 正常结束冒险
   } else {
     proceedToNextStep();
   }
@@ -131,7 +138,12 @@ const requestStoryPart = async (newPrompt: string) => {
     console.log("Generated part:", part);
 
     if (part && part.trim()) {
-      storyParts.value.push({ story: part, isFinal: false });
+      // 生成对应章节的图像
+      const imagePrompt = part; // 使用故事片段直接作为图像提示
+      const imageUrl =
+        (await generateImage(imagePrompt)) ||
+        "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
+      storyParts.value.push({ story: part, imageUrl, isFinal: false });
     } else {
       console.error("Story part is empty or undefined.");
     }
@@ -145,38 +157,35 @@ const requestStoryPart = async (newPrompt: string) => {
   }
 };
 
-// 请求生成故事的结尾
 const requestStoryEnding = async () => {
+  const { XP, HP } = selectedChoices.value;
   const previousStory = storyParts.value.map((part) => part.story).join(" ");
-  const endingPrompt = `${initialPrompt}\n\n${previousStory}\n\nConclude the story with a warm and satisfying ending.`;
+
+  let endingPrompt = `${initialPrompt}\n\n${previousStory}\n\n`;
+
+  if (HP <= 0) {
+    endingPrompt += `With HP: ${HP}, the character collapses but learns an important lesson for next time. Conclude with a humorous twist ending.`;
+  } else if (XP > 7 && HP > 7) {
+    endingPrompt += `The character triumphs with XP: ${XP} and HP: ${HP}. A heroic and satisfying ending unfolds!`;
+  } else if (XP < 5 && HP > 5) {
+    endingPrompt += `Though lacking in XP (${XP}), the character's resilience (HP: ${HP}) leads to a warm and reflective ending.`;
+  } else {
+    endingPrompt += `With balanced XP: ${XP} and HP: ${HP}, the character completes their adventure with mixed results, but a positive spirit!`;
+  }
 
   try {
     const ending = await generateStory(endingPrompt);
-    console.log("Generated ending:", ending);
-
     if (ending && ending.trim()) {
-      storyParts.value.push({ story: ending, isFinal: true });
-    } else {
-      console.error("Ending is empty or undefined.");
+      const imagePrompt = ending; // 使用故事片段直接作为图像提示
+      const imageUrl =
+        (await generateImage(imagePrompt)) ||
+        "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
+      storyParts.value.push({ story: ending, imageUrl, isFinal: true });
     }
   } catch (error) {
     console.error("Error generating story ending:", error);
   }
 };
-
-// 生成图像，使用 initialImagePrompt 和第一章节的内容
-// const generateImageForFirstChapter = async () => {
-//   if (storyParts.value.length > 0) {
-//     const firstChapter = storyParts.value[0].story; // 获取第一个章节的内容
-//     const imagePrompt = `${initialImagePrompt}\n\nIllustrate the following scene: ${firstChapter}`; // 合成图像 prompt
-
-//     try {
-//       imageUrl.value = await generateImage(imagePrompt); // 调用 generateImage 函数
-//     } catch (e) {
-//       console.error("Error generating image:", e);
-//     }
-//   }
-// };
 </script>
 
 <template>
@@ -224,8 +233,9 @@ const requestStoryEnding = async () => {
             v-for="(part, index) in storyParts"
             :key="index"
             :story="part.story"
-            :imageUrl="imageUrl"
+            :imageUrl="part.imageUrl || ''"
             :isFinal="part.isFinal"
+            :isLoading="!part.story && !part.imageUrl"
           />
         </div>
         <!-- 加载状态 -->

@@ -6,6 +6,7 @@ const { story, isFinal, imageUrl } = defineProps<{
   story: string;
   isFinal: boolean;
   imageUrl: string;
+  isLoading: boolean; // 增加 isLoading Prop
 }>();
 
 const md = new MarkdownIt();
@@ -13,10 +14,15 @@ const renderedStory = computed(() => md.render(story));
 </script>
 
 <template>
-  <div v-if="story" class="story-output">
-    <img :src="imageUrl" alt="Story Image" class="story-image" />
-    <h3 v-if="isFinal" class="story-title">Ending</h3>
-    <div class="story-content" v-html="renderedStory"></div>
+  <div class="story-output">
+    <!-- 显示 Loading 状态 -->
+    <div v-if="isLoading" class="loading">Loading story part...</div>
+    <!-- 显示内容 -->
+    <div v-else>
+      <img :src="imageUrl" alt="Story Image" class="story-image" />
+      <h3 v-if="isFinal" class="story-title">Ending</h3>
+      <div class="story-content" v-html="renderedStory"></div>
+    </div>
   </div>
 </template>
 
@@ -54,5 +60,31 @@ const renderedStory = computed(() => md.render(story));
   font-size: 0.85rem;
   line-height: 1.2;
   max-width: 250px;
+}
+.loading {
+  font-size: 1rem;
+  color: #42b883;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading::after {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-left: 0.5em;
+  border-radius: 50%;
+  border: 3px solid #42b883;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
