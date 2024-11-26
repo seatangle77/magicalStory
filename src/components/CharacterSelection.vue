@@ -1,16 +1,26 @@
 <script setup lang="ts">
-import { defineEmits } from 'vue';
+import { defineEmits } from "vue";
 
-const emit = defineEmits(['select']);
+const emit = defineEmits(["select"]);
 
 const characters = [
-  { name: 'Alex, the Adventurer', description: 'Treats ordinary things like treasure.' },
-  { name: 'Sam, the Magic Lover', description: 'Curious about magical objects but often messes up spells.' },
-  { name: 'Tom, the Collector of Oddities', description: 'Believes every object holds magic, even if it’s just a stone.' },
+  {
+    name: "Alex, the Adventurer",
+    description: "Treats ordinary things like treasure.",
+  },
+  {
+    name: "Sam, the Magic Lover",
+    description: "Curious about magical objects but often messes up spells.",
+  },
+  {
+    name: "Tom, the Collector of Oddities",
+    description:
+      "Believes every object holds magic, even if it’s just a stone.",
+  },
 ];
 
 const selectCharacter = (character: string) => {
-  emit('select', character);
+  emit("select", character);
 };
 </script>
 
@@ -31,18 +41,21 @@ const selectCharacter = (character: string) => {
 <style scoped>
 .character-selection {
   text-align: left;
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border-left: 4px solid #42b883;
+  padding: 1.5rem;
+  background: rgba(46, 64, 83, 0.95); /* 深蓝色半透明背景 */
+  border-left: 4px solid #ffd700; /* 金色边框 */
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* 柔和阴影 */
+  color: #ffffff; /* 白色文字 */
+  font-family: "Roboto", Arial, sans-serif; /* 清晰的无衬线字体 */
 }
 
 .selection-title {
-  font-size: 1.2rem;
-  color: #333;
+  font-size: 1.5rem; /* 更大的标题字体 */
+  color: #ffd700; /* 金色标题 */
   font-weight: bold;
   margin-bottom: 1rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* 柔和阴影 */
 }
 
 .character-list {
@@ -52,42 +65,52 @@ const selectCharacter = (character: string) => {
 }
 
 .character-item {
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem; /* 增加间距以便阅读 */
 }
 
 .character-button {
   width: 100%;
   text-align: left;
-  padding: 0.75rem 1rem;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(
+    135deg,
+    #2a3a4a,
+    #4e342e
+  ); /* 深蓝到深棕渐变背景 */
+  border: 2px solid #ffd700; /* 金色边框 */
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
+  transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  color: #ffffff; /* 白色文字 */
 }
 
 .character-name {
-  font-size: 1.05rem;
-  color: #42b883;
+  font-size: 1.2rem; /* 更清晰的字体大小 */
+  color: #ffd700; /* 金色文字 */
   font-weight: bold;
 }
 
 .character-description {
-  font-size: 0.9rem;
-  color: #555;
+  font-size: 1rem; /* 小字体更大一些以便清晰阅读 */
+  color: #ffffff; /* 白色文字 */
   margin-top: 0.3rem;
 }
 
 .character-button:hover {
-  background-color: #f1f1f1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(
+    135deg,
+    #4e342e,
+    #2a3a4a
+  ); /* 反转渐变以突出交互 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* 更强的阴影效果 */
+  transform: scale(1.02); /* 鼠标悬停时轻微放大 */
 }
 
 .character-button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #42b883;
+  box-shadow: 0 0 0 3px #ffd700; /* 金色高亮效果 */
 }
 </style>

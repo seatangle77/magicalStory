@@ -4,7 +4,32 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/magic.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Magical Story Game</title>
+    <title>Magical Story Adventure</title>
+    <style>
+      /* 确保 html 和 body 元素占满整个屏幕 */
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100vw; /* 100% 的视口宽度 */
+        height: 100vh; /* 100% 的视口高度 */
+        display: flex; /* 使用 Flex 布局 */
+        justify-content: center; /* 水平居中 */
+        align-items: center; /* 垂直居中 */
+        background-color: #fff; /* 可选背景色 */
+        overflow: hidden; /* 避免出现滚动条 */
+        box-sizing: border-box; /* 包含 padding */
+      }
+
+      /* 让 #app 占满整个父容器 */
+      #app {
+        width: 100%; /* 占满父容器宽度 */
+        height: 100%; /* 占满父容器高度 */
+        display: flex;
+        flex-direction: column; /* 让内容按照列排列 */
+        justify-content: center; /* 中心对齐内部内容 */
+        align-items: center;
+      }
+    </style>
   </head>
   <body>
     <div id="app"></div>

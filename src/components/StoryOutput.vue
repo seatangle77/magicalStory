@@ -31,39 +31,45 @@ const renderedStory = computed(() => md.render(story));
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.5rem;
-  background-color: #ffffff;
-  border-left: 4px solid #42b883;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  background: rgba(46, 64, 83, 0.95); /* 深蓝色半透明背景 */
+  border-left: 4px solid #ffd700; /* 金色边框 */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* 柔和阴影 */
   text-align: center;
+  color: #ffffff; /* 白色文字 */
+  font-family: "Roboto", Arial, sans-serif; /* 清晰的无衬线字体 */
 }
 
 .story-image {
   width: 250px;
   height: 250px;
   object-fit: cover;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
+  border-radius: 8px; /* 更大的圆角 */
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* 图像轻微阴影 */
 }
 
 .story-title {
   margin: 0.5rem 0;
-  font-size: 1rem;
-  color: #333;
+  font-size: 1.5rem; /* 更大的标题字体 */
+  color: #ffd700; /* 金色标题 */
   font-weight: bold;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* 柔和阴影 */
 }
 
 .story-content {
   white-space: pre-wrap;
-  color: #555;
-  font-size: 0.85rem;
-  line-height: 1.2;
-  max-width: 250px;
+  color: #ffffff; /* 白色文字 */
+  font-size: 1rem; /* 增大字体以增强清晰度 */
+  line-height: 1.5; /* 更舒适的行距 */
+  max-width: 300px; /* 增加最大宽度以适应更多文字 */
+  text-align: left; /* 内容对齐方式为左对齐，便于阅读 */
 }
+
 .loading {
-  font-size: 1rem;
-  color: #42b883;
+  font-size: 1.2rem; /* 增大加载文字字体 */
+  color: #ffd700; /* 金色加载文字 */
   text-align: center;
   display: flex;
   align-items: center;
@@ -73,11 +79,11 @@ const renderedStory = computed(() => md.render(story));
 .loading::after {
   content: "";
   display: inline-block;
-  width: 1em;
-  height: 1em;
+  width: 1.2em; /* 加大加载动画尺寸 */
+  height: 1.2em;
   margin-left: 0.5em;
   border-radius: 50%;
-  border: 3px solid #42b883;
+  border: 3px solid #ffd700; /* 金色加载动画 */
   border-top-color: transparent;
   animation: spin 0.8s linear infinite;
 }

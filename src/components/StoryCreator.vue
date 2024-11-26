@@ -212,8 +212,8 @@ const requestStoryEnding = async () => {
 
 <template>
   <div class="story-app">
-    <h1>Magical Story Creator</h1>
-    <p>Ready to create something magical?</p>
+    <h1>Magical Story Adventure</h1>
+    <p>Embark on a magical journey! Ready to create your own story?</p>
     <div v-if="!isStarted">
       <button @click="startAdventure" class="start-button">
         Start Your Magical Adventure
@@ -266,71 +266,119 @@ const requestStoryEnding = async () => {
 </template>
 
 <style scoped>
+/* 整体容器样式 */
 .story-app {
   width: 100%;
-  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: linear-gradient(
+    135deg,
+    #2a3a4a,
+    #4e342e
+  ); /* 深蓝到深棕的渐变背景 */
+  color: #ffffff; /* 明亮的白色字体 */
+  font-family: "Roboto", Arial, sans-serif; /* 清晰易读的无衬线字体 */
 }
 
+/* 标题样式 */
 .story-app h1 {
-  color: #42b883;
+  font-size: 2.4rem; /* 标题稍大一些 */
+  color: #ffd700; /* 金色标题 */
+  text-align: center;
   margin-bottom: 1rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* 增加对比的柔和阴影 */
 }
 
+/* 副标题样式 */
+.story-app p {
+  font-size: 1rem; /* 调整为清晰的字体大小 */
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #ffffff; /* 纯白色字体，增强对比度 */
+}
+
+/* 按钮样式 */
 .start-button {
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
+  padding: 0.8rem 2rem;
+  font-size: 1rem; /* 清晰的按钮文字大小 */
   cursor: pointer;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  margin-top: 2rem;
+  background: #4e342e; /* 深棕色按钮背景 */
+  color: #ffffff; /* 白色按钮文字 */
+  border: 2px solid #ffd700; /* 金色边框 */
+  border-radius: 10px;
+  margin: 2rem auto;
+  display: block;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 按钮阴影 */
+  transition: all 0.3s ease-in-out;
 }
 
+.start-button:hover {
+  background: #2a3a4a; /* 鼠标悬停时背景变为深蓝 */
+  transform: scale(1.05); /* 鼠标悬停时轻微放大 */
+}
+
+/* 故事内容区域 */
 .story-content {
+  flex: 1;
   display: flex;
   gap: 2rem;
-  margin-top: 2rem;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* 左侧选择栏样式 */
 .left-panel {
-  flex: 0.6;
+  flex: 0.4;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow-y: auto;
+  padding: 1rem;
+  background: rgba(46, 64, 83, 0.95); /* 深蓝几乎不透明背景 */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* 增加阴影 */
 }
 
 /* 右侧故事内容显示栏样式 */
 .right-panel {
-  flex: 1;
-  background-color: #f9f9f9;
+  flex: 0.6;
+  background: rgba(46, 64, 83, 0.95); /* 深蓝几乎不透明背景 */
   padding: 1rem;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: #ffffff; /* 明亮的白色字体 */
+  overflow-y: auto;
 }
 
+/* 故事进度网格 */
 .story-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Two columns per row */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 自适应列宽 */
   gap: 1rem;
 }
 
-.image-container {
-  margin-top: 1rem;
-}
+/* 图像容器样式 */
 .image-container img {
   max-width: 100%;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* 图像轻微阴影 */
 }
 
+/* 错误提示 */
 .error {
-  color: red;
+  color: #ff6f61;
+  text-align: center;
+  font-size: 1rem;
 }
+
+/* 加载中动画 */
 .loading {
-  font-size: 1.2rem;
-  color: #666;
+  font-size: 1rem;
+  color: #ffd700;
   text-align: center;
   margin-top: 1rem;
   display: flex;
@@ -345,7 +393,7 @@ const requestStoryEnding = async () => {
   height: 1em;
   margin-left: 0.5em;
   border-radius: 50%;
-  border: 3px solid #42b883; /* 颜色可以根据需求调整 */
+  border: 3px solid #ffd700;
   border-top-color: transparent;
   animation: spin 0.8s linear infinite;
 }
