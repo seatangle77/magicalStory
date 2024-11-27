@@ -8,14 +8,11 @@ import StoryCreator from "./components/StoryCreator.vue";
 
 <style>
 #app {
-  width: 100vw; /* 设置宽度占满屏幕 */
-  height: 100vh; /* 设置高度占满屏幕 */
-  margin: 0;
-  padding: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #fff; /* 可选背景色 */
-  overflow: hidden; /* 防止出现不必要的滚动条 */
 }
 </style>

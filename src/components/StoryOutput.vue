@@ -28,6 +28,8 @@ const renderedStory = computed(() => md.render(story));
 
 <style scoped>
 .story-output {
+  width: 100%;
+  margin: 1rem; /* 上下左右间距，确保每个部分有间隔 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -41,15 +43,17 @@ const renderedStory = computed(() => md.render(story));
   font-family: "Roboto", Arial, sans-serif; /* 清晰的无衬线字体 */
 }
 
+/* 图片样式 */
 .story-image {
-  width: 250px;
-  height: 250px;
+  width: 430px;
+  height: 430px;
   object-fit: cover;
   border-radius: 8px; /* 更大的圆角 */
   margin-bottom: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* 图像轻微阴影 */
 }
 
+/* 标题样式 */
 .story-title {
   margin: 0.5rem 0;
   font-size: 1.5rem; /* 更大的标题字体 */
@@ -58,15 +62,17 @@ const renderedStory = computed(() => md.render(story));
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* 柔和阴影 */
 }
 
+/* 内容样式 */
 .story-content {
   white-space: pre-wrap;
   color: #ffffff; /* 白色文字 */
-  font-size: 1rem; /* 增大字体以增强清晰度 */
+  font-size: 1.2rem; /* 增大字体以增强清晰度 */
   line-height: 1.5; /* 更舒适的行距 */
   max-width: 300px; /* 增加最大宽度以适应更多文字 */
   text-align: left; /* 内容对齐方式为左对齐，便于阅读 */
 }
 
+/* 加载动画 */
 .loading {
   font-size: 1.2rem; /* 增大加载文字字体 */
   color: #ffd700; /* 金色加载文字 */

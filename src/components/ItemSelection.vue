@@ -102,7 +102,7 @@ const selectItem = (item: string) => {
 }
 
 .item-effect {
-  font-size: 1rem; /* 小字体略大一些以便清晰阅读 */
+  font-size: 1.2 rem; /* 小字体略大一些以便清晰阅读 */
   color: #ffffff; /* 白色文字 */
   margin-top: 0.3rem;
 }

@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import CharacterSelection from "./CharacterSelection.vue";
 import SceneSelection from "./SceneSelection.vue";
 import ItemSelection from "./ItemSelection.vue";
 import StoryPathSelection from "./StoryPathSelection.vue";
 import StoryOutput from "./StoryOutput.vue";
 import { useStoryGenerator } from "../composables/useStoryGenerator";
+
+// 右侧面板 ref
+const rightPanel = ref<HTMLElement | null>(null); // 右侧面板 DOM 引用
 
 const isStarted = ref(false);
 const currentStep = ref(0); // 跟踪故事阶段 (Character, Scene, etc.)
@@ -208,6 +211,13 @@ const requestStoryEnding = async () => {
     storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
   }
 };
+
+// 监听故事部分的变化，每次新增内容时自动滚动到最右侧
+watch(storyParts, () => {
+  if (rightPanel.value) {
+    rightPanel.value.scrollLeft = rightPanel.value.scrollWidth; // 滚动到最右侧
+  }
+});
 </script>
 
 <template>
@@ -248,7 +258,7 @@ const requestStoryEnding = async () => {
       </div>
 
       <!-- 右侧故事内容显示栏 -->
-      <div class="right-panel">
+      <div class="right-panel" ref="rightPanel">
         <h2>Story Progress</h2>
         <div class="story-grid">
           <StoryOutput
@@ -294,7 +304,7 @@ const requestStoryEnding = async () => {
 
 /* 副标题样式 */
 .story-app p {
-  font-size: 1rem; /* 调整为清晰的字体大小 */
+  font-size: 1.2rem; /* 调整为清晰的字体大小 */
   text-align: center;
   margin-bottom: 2rem;
   color: #ffffff; /* 纯白色字体，增强对比度 */
@@ -303,7 +313,7 @@ const requestStoryEnding = async () => {
 /* 按钮样式 */
 .start-button {
   padding: 0.8rem 2rem;
-  font-size: 1rem; /* 清晰的按钮文字大小 */
+  font-size: 1.5rem; /* 清晰的按钮文字大小 */
   cursor: pointer;
   background: #4e342e; /* 深棕色按钮背景 */
   color: #ffffff; /* 白色按钮文字 */
@@ -332,7 +342,7 @@ const requestStoryEnding = async () => {
 
 /* 左侧选择栏样式 */
 .left-panel {
-  flex: 0.4;
+  flex: 0.3;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -345,20 +355,28 @@ const requestStoryEnding = async () => {
 
 /* 右侧故事内容显示栏样式 */
 .right-panel {
-  flex: 0.6;
+  flex: 0.7;
   background: rgba(46, 64, 83, 0.95); /* 深蓝几乎不透明背景 */
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   color: #ffffff; /* 明亮的白色字体 */
-  overflow-y: auto;
+  overflow-x: auto; /* 横向滚动条 */
+  overflow-y: hidden; /* 禁用纵向滚动条 */
+  white-space: nowrap; /* 确保内容不会换行 */
 }
 
 /* 故事进度网格 */
 .story-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 自适应列宽 */
-  gap: 1rem;
+  display: inline-flex; /* 使用横向排列的弹性布局 */
+  gap: 1rem; /* 卡片之间的间距 */
+  align-items: flex-start; /* 对齐顶部 */
+}
+
+/* 单个故事输出部分 */
+.story-output {
+  max-width: 470px; /* 与图像宽度一致 */
+  margin: 0; /* 移除外边距，由 story-grid 控制间距 */
 }
 
 /* 图像容器样式 */
