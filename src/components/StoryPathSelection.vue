@@ -31,8 +31,8 @@ const selectPath = (path: string) => {
 .story-path-selection {
   text-align: left;
   padding: 1.5rem;
-  background: rgba(46, 64, 83, 0.95); /* 深蓝色半透明背景 */
-  border-left: 4px solid #ffd700; /* 金色边框 */
+  background: rgba(42, 30, 92, 0.9); /* 深紫色半透明背景 */
+  border-left: 4px solid #ffa500; /* 金色边框 */
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* 柔和阴影 */
   color: #ffffff; /* 白色文字 */
@@ -40,11 +40,12 @@ const selectPath = (path: string) => {
 }
 
 .selection-title {
-  font-size: 1.5rem; /* 更大的标题字体 */
-  color: #ffd700; /* 金色标题 */
+  font-size: 1.8rem; /* 增大标题字体 */
+  color: #ffa500; /* 金色标题 */
   font-weight: bold;
   margin-bottom: 1rem;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* 柔和阴影 */
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6); /* 柔和阴影 */
+  text-align: center;
 }
 
 .path-list {
@@ -61,34 +62,34 @@ const selectPath = (path: string) => {
   width: 100%;
   text-align: left;
   padding: 1rem 1.5rem;
-  font-size: 1.2rem; /* 更大的字体，增加清晰度 */
-  color: #ffffff; /* 白色文字 */
+  font-size: 1.2rem;
   background: linear-gradient(
     135deg,
-    #2a3a4a,
+    #2a1e5c,
     #4e342e
-  ); /* 深蓝到深棕渐变背景 */
-  border: 2px solid #ffd700; /* 金色边框 */
-  border-radius: 8px;
+  ); /* 深紫到深棕渐变背景 */
+  border: 2px solid #ffa500; /* 金色边框 */
+  border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  transition: all 0.3s ease-in-out;
   display: flex;
-  align-items: center;
-  justify-content: space-between; /* 可适应内容对齐 */
+  flex-direction: column;
+  align-items: flex-start;
+  color: #ffffff; /* 白色文字 */
 }
 
 .path-button:hover {
   background: linear-gradient(
     135deg,
     #4e342e,
-    #2a3a4a
+    #2a1e5c
   ); /* 反转渐变以突出交互 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* 增强阴影效果 */
-  transform: scale(1.02); /* 鼠标悬停时轻微放大 */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); /* 更强的阴影效果 */
+  transform: scale(1.03); /* 鼠标悬停时轻微放大 */
 }
 
 .path-button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px #ffd700; /* 金色高亮效果 */
+  box-shadow: 0 0 0 3px #ffa500; /* 金色高亮效果 */
 }
 </style>

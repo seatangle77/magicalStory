@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { DotLottieVue } from "@lottiefiles/dotlottie-vue";
 import CharacterSelection from "./CharacterSelection.vue";
 import SceneSelection from "./SceneSelection.vue";
 import ItemSelection from "./ItemSelection.vue";
@@ -222,8 +223,26 @@ watch(storyParts, () => {
 
 <template>
   <div class="story-app">
-    <h1>Magical Story Adventure</h1>
-    <p>Embark on a magical journey! Ready to create your own story?</p>
+    <div class="header-container">
+      <h1 class="header-title">Magical Adventure Game</h1>
+      <DotLottieVue
+        style="height: 60px; width: 150px"
+        autoplay
+        loop
+        src="https://lottie.host/7f68f078-7ec8-42bc-843c-25e88dcc74df/6qlhHviqr8.lottie"
+        class="header-icon"
+      />
+    </div>
+    <p>Step into a world of magic and mystery—your adventure begins now!</p>
+    <div class="centered-lottie" v-if="!isStarted">
+      <DotLottieVue
+        style="height: 350px; width: 350px"
+        autoplay
+        loop
+        src="https://lottie.host/3a75e685-e718-4816-9c0a-adf3af822f49/ofTGo30P1n.lottie"
+      />
+    </div>
+
     <div v-if="!isStarted">
       <button @click="startAdventure" class="start-button">
         Start Your Magical Adventure
@@ -259,7 +278,7 @@ watch(storyParts, () => {
 
       <!-- 右侧故事内容显示栏 -->
       <div class="right-panel" ref="rightPanel">
-        <h2>Story Progress</h2>
+        <h3>Story Progress</h3>
         <div class="story-grid">
           <StoryOutput
             v-for="(part, index) in storyParts"
@@ -284,50 +303,72 @@ watch(storyParts, () => {
   flex-direction: column;
   padding: 1rem;
   box-sizing: border-box;
-  background: linear-gradient(
-    135deg,
-    #2a3a4a,
-    #4e342e
-  ); /* 深蓝到深棕的渐变背景 */
-  color: #ffffff; /* 明亮的白色字体 */
-  font-family: "Roboto", Arial, sans-serif; /* 清晰易读的无衬线字体 */
+  background: linear-gradient(135deg, #2a1e5c, #4e342e); /* 深紫到深棕背景 */
+  color: #ffffff; /* 白色字体 */
+  font-family: "Roboto", Arial, sans-serif; /* 清晰的无衬线字体 */
+}
+
+/* 标题与图标容器 */
+.header-container {
+  display: flex; /* 使用 Flexbox 布局 */
+  align-items: center; /* 垂直居中 */
+  justify-content: center; /* 水平居中 */
+  gap: 1rem; /* 标题与图标间距 */
+  margin-top: 4rem; /* 与上方内容拉开距离 */
 }
 
 /* 标题样式 */
-.story-app h1 {
-  font-size: 2.4rem; /* 标题稍大一些 */
-  color: #ffd700; /* 金色标题 */
+.header-title {
+  font-size: 2.8rem; /* 标题字体加大 */
+  color: #ffa500; /* 金色标题 */
   text-align: center;
-  margin-bottom: 1rem;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* 增加对比的柔和阴影 */
+  text-shadow: 0 3px 5px rgba(0, 0, 0, 0.6); /* 柔和阴影 */
+  margin: 0; /* 去掉默认外边距 */
+  margin-left: 150px;
+}
+
+/* 图标样式 */
+.header-icon {
+  height: 50px;
+  width: 120px;
+  display: inline-block;
 }
 
 /* 副标题样式 */
 .story-app p {
-  font-size: 1.2rem; /* 调整为清晰的字体大小 */
+  font-size: 1.4rem; /* 副标题清晰字体 */
   text-align: center;
   margin-bottom: 2rem;
-  color: #ffffff; /* 纯白色字体，增强对比度 */
+  color: #ffe4b5; /* 柔和金黄色 */
+}
+
+/* 居中 Lottie 动画 */
+.centered-lottie {
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+  margin: 2rem 0; /* 增加上下间距 */
 }
 
 /* 按钮样式 */
 .start-button {
-  padding: 0.8rem 2rem;
-  font-size: 1.5rem; /* 清晰的按钮文字大小 */
+  padding: 1rem 2.5rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  background: #4e342e; /* 深棕色按钮背景 */
-  color: #ffffff; /* 白色按钮文字 */
-  border: 2px solid #ffd700; /* 金色边框 */
-  border-radius: 10px;
-  margin: 2rem auto;
+  background: #2a1e5c; /* 深紫色背景 */
+  color: #ffa500; /* 金色文字 */
+  border: 2px solid #ffa500; /* 金色边框 */
+  border-radius: 12px;
+  margin: 0 auto;
   display: block;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 按钮阴影 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* 按钮阴影 */
   transition: all 0.3s ease-in-out;
 }
 
 .start-button:hover {
-  background: #2a3a4a; /* 鼠标悬停时背景变为深蓝 */
-  transform: scale(1.05); /* 鼠标悬停时轻微放大 */
+  background: #ffa500; /* 悬停时背景为金黄色 */
+  color: #2a1e5c; /* 文字变为深紫色 */
+  transform: scale(1.1); /* 悬停时轻微放大 */
 }
 
 /* 故事内容区域 */
@@ -348,57 +389,77 @@ watch(storyParts, () => {
   gap: 1rem;
   overflow-y: auto;
   padding: 1rem;
-  background: rgba(46, 64, 83, 0.95); /* 深蓝几乎不透明背景 */
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* 增加阴影 */
+  background: linear-gradient(135deg, #2a1e5c, #4e342e); /* 深紫到深棕渐变 */
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5); /* 左栏阴影 */
 }
 
 /* 右侧故事内容显示栏样式 */
 .right-panel {
   flex: 0.7;
-  background: rgba(46, 64, 83, 0.95); /* 深蓝几乎不透明背景 */
+  background: linear-gradient(135deg, #2a1e5c, #4e342e); /* 深紫到深棕渐变 */
   padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  color: #ffffff; /* 明亮的白色字体 */
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: #ffffff; /* 白色字体 */
   overflow-x: auto; /* 横向滚动条 */
   overflow-y: hidden; /* 禁用纵向滚动条 */
   white-space: nowrap; /* 确保内容不会换行 */
 }
 
+.right-panel h3 {
+  font-size: 1.8rem; /* 更大的标题字体 */
+  color: #ffa500; /* 金色标题 */
+  text-align: center;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6); /* 柔和阴影 */
+}
+
 /* 故事进度网格 */
 .story-grid {
-  display: inline-flex; /* 使用横向排列的弹性布局 */
+  display: inline-flex;
   gap: 1rem; /* 卡片之间的间距 */
-  align-items: flex-start; /* 对齐顶部 */
+  align-items: flex-start;
+}
+
+/* 图标容器 */
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 239, 180, 0.8); /* 柔和的浅金背景 */
+  border: 2px solid #ffa500; /* 金色边框 */
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* 阴影增强 */
 }
 
 /* 单个故事输出部分 */
 .story-output {
-  max-width: 470px; /* 与图像宽度一致 */
-  margin: 0; /* 移除外边距，由 story-grid 控制间距 */
+  max-width: 470px;
+  margin: 0;
 }
 
 /* 图像容器样式 */
 .image-container img {
   max-width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* 图像轻微阴影 */
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); /* 图像轻微阴影 */
 }
 
 /* 错误提示 */
 .error {
   color: #ff6f61;
   text-align: center;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 /* 加载中动画 */
 .loading {
-  font-size: 1rem;
-  color: #ffd700;
+  font-size: 1.4rem;
+  color: #ffa500; /* 金色加载文字 */
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -407,11 +468,11 @@ watch(storyParts, () => {
 .loading::after {
   content: "";
   display: inline-block;
-  width: 1em;
-  height: 1em;
+  width: 1.2em;
+  height: 1.2em;
   margin-left: 0.5em;
   border-radius: 50%;
-  border: 3px solid #ffd700;
+  border: 3px solid #ffa500;
   border-top-color: transparent;
   animation: spin 0.8s linear infinite;
 }
