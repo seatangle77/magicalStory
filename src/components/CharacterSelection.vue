@@ -5,21 +5,25 @@ const emit = defineEmits(["select"]);
 
 const characters = [
   {
-    name: "Alex, the Adventurer",
+    name: "My name is Alex, the Adventurer",
     description: "Treats ordinary things like treasure.",
+    avatar: "/src/assets/alex.png",
   },
   {
-    name: "Sam, the Magic Lover",
+    name: "My name is Luna, the Magic Lover",
     description: "Curious about magical objects but often messes up spells.",
+    avatar: "/src/assets/luna.png",
   },
   {
-    name: "Tom, the Collector of Oddities",
+    name: "My name is Tom, the Collector of Oddities",
     description:
       "Believes every object holds magic, even if it’s just a stone.",
+    avatar: "/src/assets/tom.png",
   },
 ];
 
-const selectCharacter = (character: string) => {
+const selectCharacter = (name: string, description: string) => {
+  const character = name + ": " + description;
   emit("select", character);
 };
 </script>
@@ -29,9 +33,19 @@ const selectCharacter = (character: string) => {
     <h2 class="selection-title">Choose Your Character</h2>
     <ul class="character-list">
       <li v-for="char in characters" :key="char.name" class="character-item">
-        <button @click="selectCharacter(char.name)" class="character-button">
-          <div class="character-name">{{ char.name }}</div>
-          <div class="character-description">{{ char.description }}</div>
+        <button
+          @click="selectCharacter(char.name, char.description)"
+          class="character-button"
+        >
+          <!-- 头像容器 -->
+          <div class="avatar-container">
+            <img :src="char.avatar" :alt="char.name" class="character-avatar" />
+          </div>
+          <!-- 名字和描述 -->
+          <div class="character-info">
+            <div class="character-name">{{ char.name }}</div>
+            <div class="character-description">{{ char.description }}</div>
+          </div>
         </button>
       </li>
     </ul>
@@ -39,25 +53,25 @@ const selectCharacter = (character: string) => {
 </template>
 
 <style scoped>
-/* 容器样式 */
+/* 角色选择整体样式 */
 .character-selection {
   text-align: left;
   padding: 1.5rem;
-  background: rgba(42, 30, 92, 0.9); /* 深紫色半透明背景 */
+  background: rgba(42, 30, 92, 0.9); /* 深紫色背景 */
   border-left: 4px solid #ffa500; /* 金色边框 */
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* 柔和阴影 */
   color: #ffffff; /* 白色文字 */
-  font-family: "Roboto", Arial, sans-serif; /* 清晰的无衬线字体 */
+  font-family: "Roboto", Arial, sans-serif; /* 无衬线字体 */
 }
 
 /* 标题样式 */
 .selection-title {
-  font-size: 1.8rem; /* 增大标题字体 */
-  color: #ffa500; /* 金色标题 */
+  font-size: 1.8rem;
+  color: #ffa500;
   font-weight: bold;
   margin-bottom: 1rem;
-  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6); /* 柔和阴影 */
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
   text-align: center;
 }
 
@@ -69,60 +83,83 @@ const selectCharacter = (character: string) => {
 }
 
 .character-item {
-  margin-bottom: 1rem; /* 增加间距以便阅读 */
+  margin-bottom: 1.2rem; /* 列表项之间的间距 */
 }
 
 /* 按钮样式 */
 .character-button {
+  display: flex; /* 让头像和文字水平排列 */
+  align-items: center; /* 垂直居中 */
   width: 100%;
   text-align: left;
   padding: 1rem 1.5rem;
-  background: linear-gradient(
-    135deg,
-    #2a1e5c,
-    #4e342e
-  ); /* 深紫到深棕渐变背景 */
-  border: 2px solid #ffa500; /* 金色边框 */
+  background: linear-gradient(135deg, #2a1e5c, #4e342e); /* 深紫到深棕渐变 */
+  border: 2px solid #ffa500;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
+  color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* 头像容器 */
+.avatar-container {
+  width: 80px; /* 调整头像容器大小 */
+  height: 80px;
+  flex-shrink: 0; /* 防止头像缩小 */
+  border-radius: 50%;
+  background: #ffffff; /* 白色背景 */
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  color: #ffffff; /* 白色文字 */
+  justify-content: center;
+  align-items: center;
+  margin-right: 1rem; /* 与文字间的间距 */
+  border: 2px solid #ffa500; /* 金色边框 */
 }
 
+/* 角色头像 */
+.character-avatar {
+  width: 60px; /* 头像大小 */
+  height: 60px;
+  object-fit: contain; /* 确保头像完整显示 */
+  transition: transform 0.3s;
+}
+
+/* 鼠标悬停时 */
+.character-button:hover .character-avatar {
+  transform: scale(1.1); /* 放大效果 */
+}
+
+/* 角色信息容器 */
+.character-info {
+  display: flex;
+  flex-direction: column; /* 垂直排列名字和描述 */
+  justify-content: center;
+}
+
+/* 名字样式 */
 .character-name {
-  font-size: 1.4rem; /* 更清晰的字体大小 */
-  color: #ffa500; /* 金色文字 */
+  font-size: 1.4rem;
+  color: #ffa500;
   font-weight: bold;
+  margin-bottom: 0.5rem;
 }
 
+/* 描述样式 */
 .character-description {
-  font-size: 1.2rem; /* 描述字体稍小 */
-  color: #ffffff; /* 白色文字 */
-  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  color: #ffffff;
   line-height: 1.4;
 }
 
-/* 按钮交互效果 */
+/* 按钮悬停效果 */
 .character-button:hover {
-  background: linear-gradient(
-    135deg,
-    #4e342e,
-    #2a1e5c
-  ); /* 反转渐变以突出交互 */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); /* 更强的阴影效果 */
-  transform: scale(1.03); /* 鼠标悬停时轻微放大 */
+  background: linear-gradient(135deg, #4e342e, #2a1e5c); /* 反转渐变 */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+  transform: scale(1.03);
 }
 
 .character-button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px #ffa500; /* 金色高亮效果 */
-}
-
-.character-button:active {
-  background: #6a4c93; /* 点击时变为深紫色 */
-  transform: scale(0.98); /* 点击时轻微缩小 */
+  box-shadow: 0 0 0 3px #ffa500;
 }
 </style>

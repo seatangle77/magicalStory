@@ -24,11 +24,11 @@ export function useStoryGenerator() {
       isLoading.value = true;
       error.value = '';
 
-            // 将新的用户消息添加到 messages 中
-            messages.value.push({
-              role: 'user',
-              content: _prompt
-            });
+     // 清空 messages 数组，只保留当前消息
+     messages.value = [{
+      role: 'user',
+      content: _prompt
+    }];
       
       const response = await fetch('/api/chat/completions', {
         method: 'POST',

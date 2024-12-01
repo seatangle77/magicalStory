@@ -30,20 +30,23 @@ const { generateStory, flux_generateImage, error } = useStoryGenerator();
 
 // 故事背景Prompt，将用于每一步的生成上下文
 const initialPrompt = `
-You are a children's interactive adventure story game generator. Create fun, magical, and humorous story games for children under 10. The tone should resemble Harry Potter, with twists inspired by Judy Moody.
+Here is a children's interactive adventure story game generator instructions: From First-person perspective to Create fun, magical, and humorous story games for children under 10. The tone should resemble Harry Potter, with twists inspired by Judy Moody.
+
+Opening: First, Choose You Charater ,You are...
 
 Instructions:
 
 1. The protagonist starts with Experience Points (XP): 3** and Health Points (HP): 3**, which changes as the story progresses.
-2. Each response generates **only one chapter** (20 words), logically advancing the story while updating XP and HP.
+2. Each response generates **only one chapter** (15 words), logically advancing the story while updating XP and HP.
 3. Ensure the logical continuity of the story.
 4. Endings vary based on XP and HP:
    - High XP and HP: A victorious ending.
    - Low XP, high HP: A reflective recovery.
    - Low XP and HP: A humorous and challenging ending.
-5. Maintain a lighthearted and magical tone. Avoid complex or sensitive themes.
-6. Avoid rushed endings. Gradually build toward a satisfying conclusion.
 `;
+
+const initialImagePrompt =
+  "First-person perspective in a hand-drawn fantasy illustration style inspired by mid-20th century Western children’s book art, such as Arthur Rackham or early 1900s fairy tale illustrations. The style features warm, muted earthy tones, whimsical and intricate linework, with a vintage storybook aesthetic perfect for magical and enchanting settings.";
 
 //const initialImagePrompt = `Lighthouse on a cliff overlooking the ocean`;
 
@@ -58,31 +61,38 @@ const proceedToNextStep = () => {
 const handleSelection = async (type: string, choice: string) => {
   let xpChange = 0; // 经验值变化
   let hpChange = 0; // 生命值变化
+  let relevantContent = ""; // 提取的关键内容
 
   if (type === "character") {
     selectedChoices.value.character = choice;
+    console.log("Selected character:", choice);
     xpChange = 1; // 选择角色增加少量经验值
+    relevantContent = `${choice} I begin My journey...`;
+
     await requestStoryPart(
-      `The main character is ${choice}, starting with XP: ${
+      `${choice}, starting with XP: ${
         selectedChoices.value.XP + xpChange
-      } and HP: ${
-        selectedChoices.value.HP + hpChange
-      }. They begin their journey...`
+      } and HP: ${selectedChoices.value.HP + hpChange}. I begin My journey...`,
+      relevantContent
     );
   }
   if (type === "scene") {
     selectedChoices.value.scene = choice;
+    relevantContent = `Then, I step into  ${choice} Magical challenges lie ahead...`;
 
     // 场景选择影响较大
     xpChange = Math.floor(Math.random() * 2) + 1; // 1~2点经验值
     hpChange = -Math.floor(Math.random() * 2); // 0~1点生命值减少
 
     await requestStoryPart(
-      `${selectedChoices.value.character} enters the ${choice}. Magical challenges await, affecting XP and HP...`
+      `Then, I step into ${choice} Magical challenges lie ahead, and I can feel my XP and HP shifting with every decision I make...`,
+      relevantContent
     );
   }
   if (type === "item") {
     selectedChoices.value.items.push(choice);
+    console.log("Selected item:", choice);
+    relevantContent = `On the road, I came across a treasure chest and a map. My abilities allowed me to open only one, and I chose to open the ${choice}.`;
 
     // 物品可能恢复生命值或增加经验值
     const isHealingItem = Math.random() > 0.5; // 50% 概率恢复生命值
@@ -93,24 +103,26 @@ const handleSelection = async (type: string, choice: string) => {
     }
 
     await requestStoryPart(
-      `With the magical ${choice}, the character gains XP: ${
+      `I carefully open the ${choice} and discover... , I gain XP: ${
         selectedChoices.value.XP + xpChange
-      }, and HP: ${
-        selectedChoices.value.HP + hpChange
-      }. The adventure continues...`
+      }, and HP: ${selectedChoices.value.HP + hpChange}....`,
+      relevantContent
     );
   }
   if (type === "storyPath") {
     selectedChoices.value.storyPath = choice;
-
+    console.log("Selected story path:", choice);
     // 路径选择对 XP 和 HP 的影响显著
     xpChange = Math.floor(Math.random() * 4) + 1; // 1~4点经验值
     hpChange = -Math.floor(Math.random() * 3); // 0~2点生命值减少
 
+    relevantContent = `A Monster Appears! I decide to ${choice}`;
+
     await requestStoryPart(
-      `Choosing to ${choice}, the character's XP increases to ${
+      `A Monster Appears! I decide to ${choice}, My XP increase to ${
         selectedChoices.value.XP + xpChange
-      }, but HP drops to ${selectedChoices.value.HP + hpChange}.`
+      }, but HP drops to ${selectedChoices.value.HP + hpChange}.`,
+      relevantContent
     );
   }
 
@@ -121,7 +133,7 @@ const handleSelection = async (type: string, choice: string) => {
   // 检查提前结束条件
   if (selectedChoices.value.HP <= 0) {
     await requestStoryEnding(); // 提前结束冒险
-  } else if (currentStep.value === 4) {
+  } else if (currentStep.value === 3) {
     await requestStoryEnding(); // 正常结束冒险
   } else {
     proceedToNextStep();
@@ -129,7 +141,7 @@ const handleSelection = async (type: string, choice: string) => {
 };
 
 // 请求接口生成故事片段
-const requestStoryPart = async (newPrompt: string) => {
+const requestStoryPart = async (newPrompt: string, relevantContent: string) => {
   const previousStory = storyParts.value.map((part) => part.story).join(" ");
   const prompt = `${initialPrompt}\n\n${previousStory}\n\n${newPrompt}`.trim();
 
@@ -141,18 +153,21 @@ const requestStoryPart = async (newPrompt: string) => {
     isLoading: true,
   });
 
+  console.log("Requesting story part with prompt:", prompt);
+
   try {
     const part = await generateStory(prompt);
     console.log("Generated part:", part);
 
     if (part && part.trim()) {
       // 生成对应章节的图像
-      const imagePrompt = part; // 使用故事片段直接作为图像提示
+      const imagePrompt = `${initialImagePrompt}\n\n${part}`.trim();
       const imageUrl =
         (await flux_generateImage(imagePrompt)) ||
         "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
       // 替换加载占位符为实际内容
       storyParts.value[storyParts.value.length - 1] = {
+        //story: `${relevantContent}\n${part}`,
         story: part,
         imageUrl,
         isFinal: false,
@@ -195,7 +210,7 @@ const requestStoryEnding = async () => {
   try {
     const ending = await generateStory(endingPrompt);
     if (ending && ending.trim()) {
-      const imagePrompt = ending; // 使用故事片段直接作为图像提示
+      const imagePrompt = `${initialImagePrompt}\n\n${ending}`.trim();
       const imageUrl =
         (await flux_generateImage(imagePrompt)) ||
         "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
@@ -263,7 +278,7 @@ watch(storyParts, () => {
         />
 
         <ItemSelection
-          v-if="currentStep === 2 || currentStep === 4"
+          v-if="currentStep === 2"
           :disabledItems="selectedChoices.items"
           @select="handleSelection('item', $event)"
         />
@@ -303,9 +318,12 @@ watch(storyParts, () => {
   flex-direction: column;
   padding: 1rem;
   box-sizing: border-box;
-  background: linear-gradient(135deg, #2a1e5c, #4e342e); /* 深紫到深棕背景 */
-  color: #ffffff; /* 白色字体 */
-  font-family: "Roboto", Arial, sans-serif; /* 清晰的无衬线字体 */
+  background-image: url("src/assets/bg.png"); /* Relative path */
+  background-size: cover; /* Cover the container */
+  background-repeat: no-repeat; /* Avoid repeating */
+  background-position: center; /* Center the image */
+  color: #ffffff; /* White text */
+  font-family: "Roboto", Arial, sans-serif; /* Clean sans-serif font */
 }
 
 /* 标题与图标容器 */

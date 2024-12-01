@@ -1,26 +1,56 @@
 <script setup lang="ts">
-import { defineEmits } from "vue";
+import { ref } from "vue";
 
 const emit = defineEmits(["select"]);
 
+// 攻击选项
 const paths = [
-  { name: "Explore a new area", value: "explore" },
-  { name: "Interact with a character", value: "interact" },
-  { name: "Solve a puzzle", value: "solve" },
+  {
+    name: "Cast a Magic Spell",
+    description: "A powerful magical attack!",
+    value: "spell",
+  },
+  {
+    name: "Outsmart the Monster",
+    description: "Use your wits to outsmart it.",
+    value: "trick",
+  },
+  {
+    name: "Engage in Combat",
+    description: "Charge forward with bravery!",
+    value: "combat",
+  },
 ];
 
-const selectPath = (path: string) => {
-  emit("select", path);
+// 当前选中的攻击方式
+const selectedPath = ref<string | null>(null);
+const currentAction = ref("");
+
+// 选择攻击方式
+const selectPath = (name: string, description: string, value: string) => {
+  const selectedPath = name + ": " + description + " (" + value + ")";
+  emit("select", selectedPath); // 触发选择事件
+};
+
+// 确认攻击方式
+const confirmSelection = () => {
+  if (selectedPath.value) {
+  }
 };
 </script>
 
 <template>
   <div class="story-path-selection">
-    <h3 class="selection-title">Choose Your Story Path</h3>
+    <h3 class="selection-title">A Monster Appears! Choose Your Attack</h3>
+    <p class="instruction">Select how you want to defeat the monster:</p>
     <ul class="path-list">
       <li v-for="path in paths" :key="path.value" class="path-item">
-        <button @click="selectPath(path.value)" class="path-button">
-          {{ path.name }}
+        <button
+          @click="selectPath(path.name, path.description, path.value)"
+          class="path-button"
+        >
+          <div class="path-name">{{ path.name }}</div>
+          <div class="path-description">{{ path.description }}</div>
         </button>
       </li>
     </ul>
@@ -40,12 +70,19 @@ const selectPath = (path: string) => {
 }
 
 .selection-title {
-  font-size: 1.8rem; /* 增大标题字体 */
+  font-size: 1.8rem;
   color: #ffa500; /* 金色标题 */
   font-weight: bold;
   margin-bottom: 1rem;
-  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6); /* 柔和阴影 */
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
   text-align: center;
+}
+
+.instruction {
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #ffe4b5; /* 柔和金黄色 */
 }
 
 .path-list {
@@ -88,8 +125,33 @@ const selectPath = (path: string) => {
   transform: scale(1.03); /* 鼠标悬停时轻微放大 */
 }
 
-.path-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px #ffa500; /* 金色高亮效果 */
+.path-name {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffa500; /* 金色字体 */
+}
+
+.path-description {
+  font-size: 1.2rem;
+  margin-top: 0.3rem;
+  color: #ffffff;
+}
+
+.confirm-button {
+  margin-top: 1rem;
+  padding: 1rem 2rem;
+  background: #ffa500;
+  color: #2a1e5c;
+  border: 2px solid #2a1e5c;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.confirm-button:hover {
+  background: #ff6f00;
+  transform: scale(1.05);
 }
 </style>
