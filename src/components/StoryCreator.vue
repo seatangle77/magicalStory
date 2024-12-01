@@ -61,38 +61,36 @@ const proceedToNextStep = () => {
 const handleSelection = async (type: string, choice: string) => {
   let xpChange = 0; // 经验值变化
   let hpChange = 0; // 生命值变化
-  let relevantContent = ""; // 提取的关键内容
+  //let relevantContent = ""; // 提取的关键内容
 
   if (type === "character") {
     selectedChoices.value.character = choice;
     console.log("Selected character:", choice);
     xpChange = 1; // 选择角色增加少量经验值
-    relevantContent = `${choice} I begin My journey...`;
+    //relevantContent = `${choice} I begin My journey...`;
 
     await requestStoryPart(
       `${choice}, starting with XP: ${
         selectedChoices.value.XP + xpChange
-      } and HP: ${selectedChoices.value.HP + hpChange}. I begin My journey...`,
-      relevantContent
+      } and HP: ${selectedChoices.value.HP + hpChange}. I begin My journey...`
     );
   }
   if (type === "scene") {
     selectedChoices.value.scene = choice;
-    relevantContent = `Then, I step into  ${choice} Magical challenges lie ahead...`;
+    //relevantContent = `Then, I step into  ${choice} Magical challenges lie ahead...`;
 
     // 场景选择影响较大
     xpChange = Math.floor(Math.random() * 2) + 1; // 1~2点经验值
     hpChange = -Math.floor(Math.random() * 2); // 0~1点生命值减少
 
     await requestStoryPart(
-      `Then, I step into ${choice} Magical challenges lie ahead, and I can feel my XP and HP shifting with every decision I make...`,
-      relevantContent
+      `Then, I step into ${choice} Magical challenges lie ahead, and I can feel my XP and HP shifting with every decision I make...`
     );
   }
   if (type === "item") {
     selectedChoices.value.items.push(choice);
     console.log("Selected item:", choice);
-    relevantContent = `On the road, I came across a treasure chest and a map. My abilities allowed me to open only one, and I chose to open the ${choice}.`;
+    //relevantContent = `On the road, I came across a treasure chest and a map. My abilities allowed me to open only one, and I chose to open the ${choice}.`;
 
     // 物品可能恢复生命值或增加经验值
     const isHealingItem = Math.random() > 0.5; // 50% 概率恢复生命值
@@ -105,8 +103,7 @@ const handleSelection = async (type: string, choice: string) => {
     await requestStoryPart(
       `I carefully open the ${choice} and discover... , I gain XP: ${
         selectedChoices.value.XP + xpChange
-      }, and HP: ${selectedChoices.value.HP + hpChange}....`,
-      relevantContent
+      }, and HP: ${selectedChoices.value.HP + hpChange}....`
     );
   }
   if (type === "storyPath") {
@@ -116,13 +113,12 @@ const handleSelection = async (type: string, choice: string) => {
     xpChange = Math.floor(Math.random() * 4) + 1; // 1~4点经验值
     hpChange = -Math.floor(Math.random() * 3); // 0~2点生命值减少
 
-    relevantContent = `A Monster Appears! I decide to ${choice}`;
+    //relevantContent = `A Monster Appears! I decide to ${choice}`;
 
     await requestStoryPart(
       `A Monster Appears! I decide to ${choice}, My XP increase to ${
         selectedChoices.value.XP + xpChange
-      }, but HP drops to ${selectedChoices.value.HP + hpChange}.`,
-      relevantContent
+      }, but HP drops to ${selectedChoices.value.HP + hpChange}.`
     );
   }
 
@@ -141,7 +137,7 @@ const handleSelection = async (type: string, choice: string) => {
 };
 
 // 请求接口生成故事片段
-const requestStoryPart = async (newPrompt: string, relevantContent: string) => {
+const requestStoryPart = async (newPrompt: string) => {
   const previousStory = storyParts.value.map((part) => part.story).join(" ");
   const prompt = `${initialPrompt}\n\n${previousStory}\n\n${newPrompt}`.trim();
 

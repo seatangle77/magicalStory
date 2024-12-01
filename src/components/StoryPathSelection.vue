@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref } from "vue";
-
 const emit = defineEmits(["select"]);
 
 // 攻击选项
@@ -22,20 +20,10 @@ const paths = [
   },
 ];
 
-// 当前选中的攻击方式
-const selectedPath = ref<string | null>(null);
-const currentAction = ref("");
-
 // 选择攻击方式
 const selectPath = (name: string, description: string, value: string) => {
   const selectedPath = name + ": " + description + " (" + value + ")";
   emit("select", selectedPath); // 触发选择事件
-};
-
-// 确认攻击方式
-const confirmSelection = () => {
-  if (selectedPath.value) {
-  }
 };
 </script>
 
