@@ -9,12 +9,12 @@ const items = [
   {
     name: "Mystic Telescope",
     effect: "Its secrets unfold only when the time is right.",
-    image: "/src/assets/telescope.png",
+    image: "/assets/telescope.png",
   },
   {
     name: "Treasure Chest",
     effect: "What lies inside is never what you expect.",
-    image: "/src/assets/chest.png",
+    image: "/assets/chest.png",
   },
 ];
 

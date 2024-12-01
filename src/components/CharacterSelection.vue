@@ -7,18 +7,18 @@ const characters = [
   {
     name: "My name is Alex, the Adventurer",
     description: "Treats ordinary things like treasure.",
-    avatar: "/src/assets/alex.png",
+    avatar: "/assets/alex.png",
   },
   {
     name: "My name is Luna, the Magic Lover",
     description: "Curious about magical objects but often messes up spells.",
-    avatar: "/src/assets/luna.png",
+    avatar: "/assets/luna.png",
   },
   {
     name: "My name is Tom, the Collector of Oddities",
     description:
       "Believes every object holds magic, even if it’s just a stone.",
-    avatar: "/src/assets/tom.png",
+    avatar: "/assets/tom.png",
   },
 ];
 

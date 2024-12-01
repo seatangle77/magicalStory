@@ -9,18 +9,18 @@ const scenes = [
     name: "The Enchanted Cave",
     description:
       "Echoes of forgotten tales and glowing crystals guide you to hidden treasures.",
-    image: "/src/assets/cave.png",
+    image: "/assets/cave.png",
   },
   {
     name: "The Ancient Castle",
     description: "Portraits hum songs, and staircases twist and turn by magic.",
-    image: "/src/assets/castle.png",
+    image: "/assets/castle.png",
   },
   {
     name: "The Mystical Ship",
     description:
       "The ship sails itself, with lanterns glowing and the compass whispering secrets.",
-    image: "/src/assets/ship.png",
+    image: "/assets/ship.png",
   },
 ];
 

@@ -14,5 +14,18 @@ export default defineConfig({
         }
       }
     }
-  }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name].[hash][extname]', // 确保资源输出到正确位置
+      },
+    },
+    assetsInlineLimit: 0, // 禁用小文件内联
+  },
+  resolve: {
+    alias: {
+      '@': '/src', // 添加路径别名
+    },
+  },
 })

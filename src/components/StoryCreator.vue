@@ -314,7 +314,7 @@ watch(storyParts, () => {
   flex-direction: column;
   padding: 1rem;
   box-sizing: border-box;
-  background-image: url("src/assets/bg.png"); /* Relative path */
+  background-image: url("/assets/bg.png"); /* Relative path */
   background-size: cover; /* Cover the container */
   background-repeat: no-repeat; /* Avoid repeating */
   background-position: center; /* Center the image */
