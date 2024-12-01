@@ -32,8 +32,6 @@ const { generateStory, flux_generateImage, error } = useStoryGenerator();
 const initialPrompt = `
 Here is a children's interactive adventure story game generator instructions: From First-person perspective to Create fun, magical, and humorous story games for children under 10. The tone should resemble Harry Potter, with twists inspired by Judy Moody.
 
-Opening: First, Choose You Charater ,You are...
-
 Instructions:
 
 1. The protagonist starts with Experience Points (XP): 3** and Health Points (HP): 3**, which changes as the story progresses.
