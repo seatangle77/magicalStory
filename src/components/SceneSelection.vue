@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { defineEmits } from "vue";
 
 const emit = defineEmits(["select"]);
 
-// 使用相对路径加载场景图片
 const scenes = [
   {
     name: "The Enchanted Cave",
@@ -24,7 +24,12 @@ const scenes = [
   },
 ];
 
+// 用于存储选中的场景名称
+const selectedScene = ref<string | null>(null);
+
 const selectScene = (name: string, description: string) => {
+  if (selectedScene.value) return; // 如果已经选择场景，阻止重复选择
+  selectedScene.value = name; // 记录选中的场景
   const scene = name + ": " + description;
   emit("select", scene);
 };
@@ -36,8 +41,12 @@ const selectScene = (name: string, description: string) => {
     <ul class="scene-list">
       <li v-for="scene in scenes" :key="scene.name" class="scene-item">
         <button
+          :disabled="Boolean(selectedScene) && selectedScene !== scene.name"
           @click="selectScene(scene.name, scene.description)"
           class="scene-button"
+          :class="{
+            disabled: Boolean(selectedScene) && selectedScene !== scene.name,
+          }"
         >
           <!-- 场景图片 -->
           <img :src="scene.image" :alt="scene.name" class="scene-image" />
@@ -53,6 +62,18 @@ const selectScene = (name: string, description: string) => {
 </template>
 
 <style scoped>
+/* 按钮禁用样式 */
+.scene-button:disabled {
+  background: #4e342e; /* 禁用状态下的背景色 */
+  color: rgba(255, 255, 255, 0.5); /* 禁用状态下文字颜色变浅 */
+  cursor: not-allowed; /* 禁用状态鼠标样式 */
+  opacity: 0.6; /* 减弱按钮的可见度 */
+}
+
+.scene-button.disabled {
+  background: #4e342e; /* 禁用状态下的背景色 */
+  color: rgba(255, 255, 255, 0.5); /* 禁用状态下文字颜色变浅 */
+}
 /* 容器样式 */
 .scene-selection {
   text-align: left;

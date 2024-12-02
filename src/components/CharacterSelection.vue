@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { defineEmits } from "vue";
+import { ref, defineEmits } from "vue";
 
 const emit = defineEmits(["select"]);
 
+// 初始化角色数据
 const characters = [
   {
     name: "My name is Alex, the Adventurer",
@@ -22,7 +23,13 @@ const characters = [
   },
 ];
 
+// 用于存储选中的角色
+const selectedCharacter = ref<string | null>(null);
+
+// 处理角色选择
 const selectCharacter = (name: string, description: string) => {
+  if (selectedCharacter.value) return; // 如果已有选中角色，则阻止操作
+  selectedCharacter.value = name; // 标记已选中角色
   const character = name + ": " + description;
   emit("select", character);
 };
@@ -30,12 +37,19 @@ const selectCharacter = (name: string, description: string) => {
 
 <template>
   <div class="character-selection">
-    <h2 class="selection-title">Choose Your Character</h2>
+    <h2 class="selection-title">选择你的角色</h2>
     <ul class="character-list">
       <li v-for="char in characters" :key="char.name" class="character-item">
         <button
+          :disabled="
+            Boolean(selectedCharacter) && selectedCharacter !== char.name
+          "
           @click="selectCharacter(char.name, char.description)"
           class="character-button"
+          :class="{
+            disabled:
+              Boolean(selectedCharacter) && selectedCharacter !== char.name,
+          }"
         >
           <!-- 头像容器 -->
           <div class="avatar-container">
@@ -53,6 +67,11 @@ const selectCharacter = (name: string, description: string) => {
 </template>
 
 <style scoped>
+/* 添加禁用按钮的样式 */
+.character-button.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 /* 角色选择整体样式 */
 .character-selection {
   text-align: left;
@@ -102,6 +121,20 @@ const selectCharacter = (name: string, description: string) => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* 禁用样式 */
+.character-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background: #4e342e;
+}
+
+/* 鼠标悬停时 */
+.character-button:hover:enabled {
+  background: linear-gradient(135deg, #4e342e, #2a1e5c); /* 反转渐变 */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+  transform: scale(1.03);
+}
+
 /* 头像容器 */
 .avatar-container {
   width: 80px; /* 调整头像容器大小 */
@@ -149,17 +182,5 @@ const selectCharacter = (name: string, description: string) => {
   font-size: 1.2rem;
   color: #ffffff;
   line-height: 1.4;
-}
-
-/* 按钮悬停效果 */
-.character-button:hover {
-  background: linear-gradient(135deg, #4e342e, #2a1e5c); /* 反转渐变 */
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
-  transform: scale(1.03);
-}
-
-.character-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px #ffa500;
 }
 </style>

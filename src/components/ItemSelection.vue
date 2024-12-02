@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { defineProps, defineEmits } from "vue";
 
 const props = defineProps<{ disabledItems: string[] }>();
@@ -18,9 +19,14 @@ const items = [
   },
 ];
 
+// 用于存储选中的物品名称
+const selectedItem = ref<string | null>(null);
+
 const selectItem = (name: string, effect: string) => {
+  if (selectedItem.value) return; // 如果已经选择物品，阻止重复选择
+  selectedItem.value = name; // 记录选中的物品
   const item = name + ": " + effect;
-  emit("select", item);
+  emit("select", item); // 通知父组件选中的物品
 };
 </script>
 
@@ -32,9 +38,15 @@ const selectItem = (name: string, effect: string) => {
     <ul class="item-list">
       <li v-for="item in items" :key="item.name" class="item">
         <button
-          :disabled="props.disabledItems.includes(item.name)"
+          :disabled="
+            (Boolean(selectedItem) && selectedItem !== item.name) ||
+            props.disabledItems.includes(item.name)
+          "
           @click="selectItem(item.name, item.effect)"
           class="item-button"
+          :class="{
+            disabled: Boolean(selectedItem) && selectedItem !== item.name,
+          }"
         >
           <!-- 物品图片 -->
           <img :src="item.image" :alt="item.name" class="item-image" />
@@ -100,6 +112,7 @@ const selectItem = (name: string, effect: string) => {
   color: #aaaaaa; /* 浅灰色文字 */
   border: 2px solid #666666; /* 浅灰色边框 */
   cursor: not-allowed; /* 禁用光标样式 */
+  opacity: 0.6; /* 减弱按钮的可见度 */
 }
 
 /* 物品图片样式 */

@@ -1,16 +1,61 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import MarkdownIt from "markdown-it";
+import { ref, watch } from "vue";
 
-const { story, isFinal, imageUrl } = defineProps<{
+const { story, isFinal, imageUrl, isLoading } = defineProps<{
   story: string;
   isFinal: boolean;
   imageUrl: string;
-  isLoading: boolean; // 增加 isLoading Prop
+  isLoading: boolean; // 是否处于加载状态
 }>();
 
-const md = new MarkdownIt();
-const renderedStory = computed(() => md.render(story));
+const displayedText = ref(""); // 当前显示的文字
+const typingSpeed = 80; // 打字速度（毫秒/字符）
+
+// 初始化 Web Speech API
+const synth = window.speechSynthesis;
+
+// 配置语音朗读
+let utterance: SpeechSynthesisUtterance | null = null;
+const speakTextPartially = (currentText: string) => {
+  if (!utterance) {
+    utterance = new SpeechSynthesisUtterance();
+    utterance.lang = "en-US"; // 设置语言
+    utterance.rate = 0.8; // 设置语速
+    utterance.pitch = 1.1; // 设置语调
+  }
+
+  synth.cancel(); // 取消之前的朗读
+  utterance.text = currentText; // 设置当前显示的文本
+  synth.speak(utterance); // 开始朗读
+};
+
+// 打字机效果函数
+const startTypingEffect = () => {
+  let index = 0;
+  displayedText.value = ""; // 清空显示文本
+
+  // 停止之前的语音朗读（防止冲突）
+  synth.cancel();
+
+  const type = () => {
+    if (index < story.length) {
+      displayedText.value += story[index]; // 逐字显示
+      speakTextPartially(displayedText.value); // 同步朗读当前显示的文字
+      index++;
+      setTimeout(type, typingSpeed); // 继续打字
+    }
+  };
+
+  type(); // 开始打字效果
+};
+
+// 监听 story 的变化，当 story 更新时触发打字和朗读效果
+watch(
+  () => story,
+  () => {
+    startTypingEffect();
+  }
+);
 </script>
 
 <template>
@@ -21,7 +66,8 @@ const renderedStory = computed(() => md.render(story));
     <div v-else>
       <img :src="imageUrl" alt="Story Image" class="story-image" />
       <h3 v-if="isFinal" class="story-title">Ending</h3>
-      <div class="story-content" v-html="renderedStory"></div>
+      <div class="story-content">{{ displayedText }}</div>
+      <!-- 打字效果显示 -->
     </div>
   </div>
 </template>
@@ -81,6 +127,7 @@ const renderedStory = computed(() => md.render(story));
   text-align: left; /* 左对齐内容 */
   margin: 0 auto;
   max-width: 400px; /* 限制最大宽度，确保易读性 */
+  font-family: "Courier New", monospace; /* 打字机风格字体 */
 }
 
 /* 加载动画 */

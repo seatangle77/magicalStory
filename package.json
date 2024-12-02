@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@lottiefiles/dotlottie-vue": "^0.5.1",
+    "howler": "^2.2.4",
     "markdown-it": "^14.1.0",
     "openai": "^4.28.0",
     "vue": "^3.4.38",

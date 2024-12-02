@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from "vue";
+
 const emit = defineEmits(["select"]);
 
 // 攻击选项
@@ -20,10 +22,15 @@ const paths = [
   },
 ];
 
+// 选中的攻击选项
+const selectedPath = ref<string | null>(null);
+
 // 选择攻击方式
 const selectPath = (name: string, description: string, value: string) => {
-  const selectedPath = name + ": " + description + " (" + value + ")";
-  emit("select", selectedPath); // 触发选择事件
+  if (selectedPath.value) return; // 如果已经选择了攻击方式，阻止重复选择
+  selectedPath.value = value; // 记录选中的攻击方式
+  const selectedPathText = name + ": " + description + " (" + value + ")";
+  emit("select", selectedPathText); // 触发选择事件
 };
 </script>
 
@@ -34,8 +41,12 @@ const selectPath = (name: string, description: string, value: string) => {
     <ul class="path-list">
       <li v-for="path in paths" :key="path.value" class="path-item">
         <button
+          :disabled="Boolean(selectedPath) && selectedPath !== path.value"
           @click="selectPath(path.name, path.description, path.value)"
           class="path-button"
+          :class="{
+            disabled: Boolean(selectedPath) && selectedPath !== path.value,
+          }"
         >
           <div class="path-name">{{ path.name }}</div>
           <div class="path-description">{{ path.description }}</div>
@@ -103,7 +114,15 @@ const selectPath = (name: string, description: string, value: string) => {
   color: #ffffff; /* 白色文字 */
 }
 
-.path-button:hover {
+.path-button.disabled {
+  background-color: #3a3a3a; /* 禁用按钮的深灰背景 */
+  color: #aaaaaa; /* 浅灰文字 */
+  border: 2px solid #666666; /* 浅灰边框 */
+  cursor: not-allowed;
+  opacity: 0.6; /* 减弱按钮的可见度 */
+}
+
+.path-button:hover:not(.disabled) {
   background: linear-gradient(
     135deg,
     #4e342e,
@@ -123,23 +142,5 @@ const selectPath = (name: string, description: string, value: string) => {
   font-size: 1.2rem;
   margin-top: 0.3rem;
   color: #ffffff;
-}
-
-.confirm-button {
-  margin-top: 1rem;
-  padding: 1rem 2rem;
-  background: #ffa500;
-  color: #2a1e5c;
-  border: 2px solid #2a1e5c;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.confirm-button:hover {
-  background: #ff6f00;
-  transform: scale(1.05);
 }
 </style>

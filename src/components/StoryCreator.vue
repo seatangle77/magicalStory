@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { DotLottieVue } from "@lottiefiles/dotlottie-vue";
-import CharacterSelection from "./CharacterSelection.vue";
-import SceneSelection from "./SceneSelection.vue";
-import ItemSelection from "./ItemSelection.vue";
-import StoryPathSelection from "./StoryPathSelection.vue";
+import LeftPanel from "./LeftPanel.vue";
 import StoryOutput from "./StoryOutput.vue";
 import { useStoryGenerator } from "../composables/useStoryGenerator";
 
@@ -46,8 +43,6 @@ Instructions:
 const initialImagePrompt =
   "First-person perspective in a hand-drawn fantasy illustration style inspired by mid-20th century Western children’s book art, such as Arthur Rackham or early 1900s fairy tale illustrations. The style features warm, muted earthy tones, whimsical and intricate linework, with a vintage storybook aesthetic perfect for magical and enchanting settings.";
 
-//const initialImagePrompt = `Lighthouse on a cliff overlooking the ocean`;
-
 const startAdventure = () => {
   isStarted.value = true;
 };
@@ -59,14 +54,10 @@ const proceedToNextStep = () => {
 const handleSelection = async (type: string, choice: string) => {
   let xpChange = 0; // 经验值变化
   let hpChange = 0; // 生命值变化
-  //let relevantContent = ""; // 提取的关键内容
 
   if (type === "character") {
     selectedChoices.value.character = choice;
-    console.log("Selected character:", choice);
     xpChange = 1; // 选择角色增加少量经验值
-    //relevantContent = `${choice} I begin My journey...`;
-
     await requestStoryPart(
       `${choice}, starting with XP: ${
         selectedChoices.value.XP + xpChange
@@ -75,29 +66,20 @@ const handleSelection = async (type: string, choice: string) => {
   }
   if (type === "scene") {
     selectedChoices.value.scene = choice;
-    //relevantContent = `Then, I step into  ${choice} Magical challenges lie ahead...`;
-
-    // 场景选择影响较大
     xpChange = Math.floor(Math.random() * 2) + 1; // 1~2点经验值
     hpChange = -Math.floor(Math.random() * 2); // 0~1点生命值减少
-
     await requestStoryPart(
       `Then, I step into ${choice} Magical challenges lie ahead, and I can feel my XP and HP shifting with every decision I make...`
     );
   }
   if (type === "item") {
     selectedChoices.value.items.push(choice);
-    console.log("Selected item:", choice);
-    //relevantContent = `On the road, I came across a treasure chest and a map. My abilities allowed me to open only one, and I chose to open the ${choice}.`;
-
-    // 物品可能恢复生命值或增加经验值
     const isHealingItem = Math.random() > 0.5; // 50% 概率恢复生命值
     if (isHealingItem) {
       hpChange = Math.floor(Math.random() * 2) + 1; // 1~2点生命值
     } else {
       xpChange = Math.floor(Math.random() * 3) + 1; // 1~3点经验值
     }
-
     await requestStoryPart(
       `I carefully open the ${choice} and discover... , I gain XP: ${
         selectedChoices.value.XP + xpChange
@@ -106,13 +88,8 @@ const handleSelection = async (type: string, choice: string) => {
   }
   if (type === "storyPath") {
     selectedChoices.value.storyPath = choice;
-    console.log("Selected story path:", choice);
-    // 路径选择对 XP 和 HP 的影响显著
     xpChange = Math.floor(Math.random() * 4) + 1; // 1~4点经验值
     hpChange = -Math.floor(Math.random() * 3); // 0~2点生命值减少
-
-    //relevantContent = `A Monster Appears! I decide to ${choice}`;
-
     await requestStoryPart(
       `A Monster Appears! I decide to ${choice}, My XP increase to ${
         selectedChoices.value.XP + xpChange
@@ -126,11 +103,15 @@ const handleSelection = async (type: string, choice: string) => {
 
   // 检查提前结束条件
   if (selectedChoices.value.HP <= 0) {
-    await requestStoryEnding(); // 提前结束冒险
+    console.log("Adventure ends early due to HP depletion.");
+    setTimeout(async () => {
+      await requestStoryEnding(); // 提前结束冒险
+    }, 3000); // 延时 3 秒
   } else if (currentStep.value === 3) {
-    await requestStoryEnding(); // 正常结束冒险
-  } else {
-    proceedToNextStep();
+    console.log("Adventure reaches normal ending.");
+    setTimeout(async () => {
+      await requestStoryEnding(); // 正常结束冒险
+    }, 3000); // 延时 3 秒
   }
 };
 
@@ -147,32 +128,23 @@ const requestStoryPart = async (newPrompt: string) => {
     isLoading: true,
   });
 
-  console.log("Requesting story part with prompt:", prompt);
-
   try {
     const part = await generateStory(prompt);
-    console.log("Generated part:", part);
-
     if (part && part.trim()) {
-      // 生成对应章节的图像
       const imagePrompt = `${initialImagePrompt}\n\n${part}`.trim();
       const imageUrl =
         (await flux_generateImage(imagePrompt)) ||
         "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
-      // 替换加载占位符为实际内容
       storyParts.value[storyParts.value.length - 1] = {
-        //story: `${relevantContent}\n${part}`,
         story: part,
         imageUrl,
         isFinal: false,
         isLoading: false,
       };
     } else {
-      console.error("Story part is empty or undefined.");
       storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
     }
   } catch (error) {
-    console.error("Error generating story part:", error);
     storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
   }
 };
@@ -180,7 +152,6 @@ const requestStoryPart = async (newPrompt: string) => {
 const requestStoryEnding = async () => {
   const { XP, HP } = selectedChoices.value;
   const previousStory = storyParts.value.map((part) => part.story).join(" ");
-
   let endingPrompt = `${initialPrompt}\n\n${previousStory}\n\n`;
 
   if (HP <= 0) {
@@ -193,7 +164,6 @@ const requestStoryEnding = async () => {
     endingPrompt += `With balanced XP: ${XP} and HP: ${HP}, the character completes their adventure with mixed results, but a positive spirit!`;
   }
 
-  // 添加加载占位符
   storyParts.value.push({
     story: "",
     imageUrl: "",
@@ -208,7 +178,6 @@ const requestStoryEnding = async () => {
       const imageUrl =
         (await flux_generateImage(imagePrompt)) ||
         "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
-      // 替换加载占位符为实际内容
       storyParts.value[storyParts.value.length - 1] = {
         story: ending,
         imageUrl,
@@ -217,12 +186,11 @@ const requestStoryEnding = async () => {
       };
     }
   } catch (error) {
-    console.error("Error generating story ending:", error);
     storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
   }
 };
 
-// 监听故事部分的变化，每次新增内容时自动滚动到最右侧
+// 自动滚动到最右侧
 watch(storyParts, () => {
   if (rightPanel.value) {
     rightPanel.value.scrollLeft = rightPanel.value.scrollWidth; // 滚动到最右侧
@@ -260,30 +228,13 @@ watch(storyParts, () => {
 
     <div v-else class="story-content">
       <!-- 左侧选择栏 -->
-      <div class="left-panel">
-        <CharacterSelection
-          v-if="currentStep === 0"
-          @select="handleSelection('character', $event)"
-        />
-
-        <SceneSelection
-          v-if="currentStep === 1"
-          @select="handleSelection('scene', $event)"
-        />
-
-        <ItemSelection
-          v-if="currentStep === 2"
-          :disabledItems="selectedChoices.items"
-          @select="handleSelection('item', $event)"
-        />
-
-        <StoryPathSelection
-          v-if="currentStep === 3"
-          @select="handleSelection('storyPath', $event)"
-        />
-
-        <div v-if="error" class="error">{{ error }}</div>
-      </div>
+      <LeftPanel
+        :currentStep="currentStep"
+        :selectedChoices="selectedChoices"
+        :error="error"
+        @select="handleSelection"
+        @nextStep="proceedToNextStep"
+      />
 
       <!-- 右侧故事内容显示栏 -->
       <div class="right-panel" ref="rightPanel">
