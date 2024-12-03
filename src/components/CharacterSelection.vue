@@ -37,7 +37,7 @@ const selectCharacter = (name: string, description: string) => {
 
 <template>
   <div class="character-selection">
-    <h2 class="selection-title">选择你的角色</h2>
+    <h2 class="selection-title">Choose your character</h2>
     <ul class="character-list">
       <li v-for="char in characters" :key="char.name" class="character-item">
         <button

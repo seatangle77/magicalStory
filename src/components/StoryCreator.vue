@@ -201,7 +201,7 @@ watch(storyParts, () => {
 <template>
   <div class="story-app">
     <div class="header-container">
-      <h1 class="header-title">Magical Adventure Game</h1>
+      <h1 class="header-title">Magical Adventure Story</h1>
       <DotLottieVue
         style="height: 60px; width: 150px"
         autoplay
