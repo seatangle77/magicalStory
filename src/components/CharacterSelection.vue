@@ -15,12 +15,6 @@ const characters = [
     description: "Curious about magical objects but often messes up spells.",
     avatar: "/assets/luna.png",
   },
-  {
-    name: "My name is Tom, the Collector of Oddities",
-    description:
-      "Believes every object holds magic, even if it’s just a stone.",
-    avatar: "/assets/tom.png",
-  },
 ];
 
 // 用于存储选中的角色

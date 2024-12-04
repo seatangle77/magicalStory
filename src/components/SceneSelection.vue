@@ -7,42 +7,37 @@ const emit = defineEmits(["select"]);
 const scenes = [
   {
     name: "The Enchanted Cave",
-    description:
-      "Echoes of forgotten tales and glowing crystals guide you to hidden treasures.",
+    description: "Echoes of forgotten tales and glowing crystals fill the air.",
+    goal: "Defeat the Crystal Guardian to unlock the treasure chest.",
     image: "/assets/cave.png",
   },
   {
     name: "The Ancient Castle",
-    description: "Portraits hum songs, and staircases twist and turn by magic.",
+    description: "Portraits hum songs, and staircases twist by magic.",
+    goal: "Battle the Phantom Knight to claim the enchanted key.",
     image: "/assets/castle.png",
-  },
-  {
-    name: "The Mystical Ship",
-    description:
-      "The ship sails itself, with lanterns glowing and the compass whispering secrets.",
-    image: "/assets/ship.png",
   },
 ];
 
 // 用于存储选中的场景名称
 const selectedScene = ref<string | null>(null);
 
-const selectScene = (name: string, description: string) => {
+const selectScene = (name: string, description: string, goal: string) => {
   if (selectedScene.value) return; // 如果已经选择场景，阻止重复选择
   selectedScene.value = name; // 记录选中的场景
-  const scene = name + ": " + description;
+  const scene = `${name}: ${description} Goal: ${goal}`;
   emit("select", scene);
 };
 </script>
 
 <template>
   <div class="scene-selection">
-    <h2 class="selection-title">Choose Your Next Destination</h2>
+    <h2 class="selection-title">Choose Your Scene</h2>
     <ul class="scene-list">
       <li v-for="scene in scenes" :key="scene.name" class="scene-item">
         <button
           :disabled="Boolean(selectedScene) && selectedScene !== scene.name"
-          @click="selectScene(scene.name, scene.description)"
+          @click="selectScene(scene.name, scene.description, scene.goal)"
           class="scene-button"
           :class="{
             disabled: Boolean(selectedScene) && selectedScene !== scene.name,
@@ -54,6 +49,9 @@ const selectScene = (name: string, description: string) => {
           <div class="scene-info">
             <div class="scene-name">{{ scene.name }}</div>
             <div class="scene-description">{{ scene.description }}</div>
+            <div class="scene-goal">
+              <strong>Goal:</strong> {{ scene.goal }}
+            </div>
           </div>
         </button>
       </li>
@@ -153,6 +151,14 @@ const selectScene = (name: string, description: string) => {
   font-size: 1.2rem;
   color: #ffffff;
   line-height: 1.4;
+}
+
+/* 场景目标 */
+.scene-goal {
+  font-size: 1.2rem;
+  color: #ffe4b5;
+  margin-top: 0.3rem;
+  font-weight: bold;
 }
 
 /* 按钮交互效果 */

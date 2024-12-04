@@ -1,12 +1,11 @@
-import { ref } from 'vue';
+import { ref } from "vue";
 
-//HKUST_GZ GPT API KEY
-const GPT_API_KEY = '77f41932a23a429cb68b84e3cd7c8321914531b95d8d48b8a21dc1f983ec51ea';
-//Stability AI Image API KEY
-const IMAGE_API_KEY = 'sk-YJ5YPHI4Kg6HgCCbSXUN6oXvmkPoV1h0AP9f3T5T9vbqwkGl';
-//Flux AI Image API KEY
-const F_IMAGE_API_KEY = '484f5568-212b-4325-b721-f9cd9982548f';
-
+// HKUST_GZ GPT API KEY
+const GPT_API_KEY = "77f41932a23a429cb68b84e3cd7c8321914531b95d8d48b8a21dc1f983ec51ea";
+// Stability AI Image API KEY
+const IMAGE_API_KEY = "sk-YJ5YPHI4Kg6HgCCbSXUN6oXvmkPoV1h0AP9f3T5T9vbqwkGl";
+// Flux AI Image API KEY
+const F_IMAGE_API_KEY = "484f5568-212b-4325-b721-f9cd9982548f";
 
 
 export function useStoryGenerator() {
@@ -18,7 +17,8 @@ export function useStoryGenerator() {
     role: 'user',
     content: '',
   }]);
- 
+
+
   const generateStory = async (_prompt: string) => {
     try {
       isLoading.value = true;
@@ -199,6 +199,6 @@ export function useStoryGenerator() {
     story,
     image,
     isLoading,
-    error
+    error,
   };
 }

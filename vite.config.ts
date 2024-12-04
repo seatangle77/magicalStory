@@ -26,6 +26,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': '/src', // 添加路径别名
-    },
+    }
+  },
+  define: {
+    global: 'window', // Define `global` as `window` for browser compatibility
   },
 })

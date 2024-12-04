@@ -7,6 +7,7 @@ import { useStoryGenerator } from "../composables/useStoryGenerator";
 
 // 右侧面板 ref
 const rightPanel = ref<HTMLElement | null>(null); // 右侧面板 DOM 引用
+const isStoryPart1Loaded = ref(false);
 
 const isStarted = ref(false);
 const currentStep = ref(0); // 跟踪故事阶段 (Character, Scene, etc.)
@@ -15,8 +16,6 @@ const selectedChoices = ref({
   scene: "",
   items: [] as string[],
   storyPath: "",
-  XP: 3, // 初始经验值
-  HP: 3, // 初始生命值
 });
 
 const storyParts = ref<
@@ -25,19 +24,20 @@ const storyParts = ref<
 
 const { generateStory, flux_generateImage, error } = useStoryGenerator();
 
-// 故事背景Prompt，将用于每一步的生成上下文
-const initialPrompt = `
-Here is a children's interactive adventure story game generator instructions: From First-person perspective to Create fun, magical, and humorous story games for children under 10. The tone should resemble Harry Potter, with twists inspired by Judy Moody.
+// 第一段故事Prompt
+const initialPromptPart1 = `
+Here is a children's interactive adventure story game generator instructions: From First-person perspective to create fun, magical, and humorous story for children under 10. The tone should resemble Harry Potter.
 
 Instructions:
 
-1. The protagonist starts with Experience Points (XP): 3** and Health Points (HP): 3**, which changes as the story progresses.
-2. Each response generates **only one chapter** (15 words), logically advancing the story while updating XP and HP.
-3. Ensure the logical continuity of the story.
-4. Endings vary based on XP and HP:
-   - High XP and HP: A victorious ending.
-   - Low XP, high HP: A reflective recovery.
-   - Low XP and HP: A humorous and challenging ending.
+1. Combine the character and scene to start the story，50 words limited.
+2. End the first half of the story with a prompt for the user to use their wand and cast a spell to attack the monster.
+`;
+
+// 第二段故事Prompt
+const initialPromptPart2 = `
+Continue the story based on the user's previous actions and their spoken spell. 
+Conclude the story with a clear and magical ending, 50 words limited.
 `;
 
 const initialImagePrompt =
@@ -52,73 +52,29 @@ const proceedToNextStep = () => {
 };
 
 const handleSelection = async (type: string, choice: string) => {
-  let xpChange = 0; // 经验值变化
-  let hpChange = 0; // 生命值变化
-
   if (type === "character") {
     selectedChoices.value.character = choice;
-    xpChange = 1; // 选择角色增加少量经验值
-    await requestStoryPart(
-      `${choice}, starting with XP: ${
-        selectedChoices.value.XP + xpChange
-      } and HP: ${selectedChoices.value.HP + hpChange}. I begin My journey...`
-    );
-  }
-  if (type === "scene") {
+    proceedToNextStep(); // 自动跳转到场景选择
+  } else if (type === "scene") {
     selectedChoices.value.scene = choice;
-    xpChange = Math.floor(Math.random() * 2) + 1; // 1~2点经验值
-    hpChange = -Math.floor(Math.random() * 2); // 0~1点生命值减少
-    await requestStoryPart(
-      `Then, I step into ${choice} Magical challenges lie ahead, and I can feel my XP and HP shifting with every decision I make...`
-    );
-  }
-  if (type === "item") {
-    selectedChoices.value.items.push(choice);
-    const isHealingItem = Math.random() > 0.5; // 50% 概率恢复生命值
-    if (isHealingItem) {
-      hpChange = Math.floor(Math.random() * 2) + 1; // 1~2点生命值
-    } else {
-      xpChange = Math.floor(Math.random() * 3) + 1; // 1~3点经验值
+    await requestStoryPart1();
+    if (isStoryPart1Loaded.value) {
+      proceedToNextStep(); // 跳转到语音输入
     }
-    await requestStoryPart(
-      `I carefully open the ${choice} and discover... , I gain XP: ${
-        selectedChoices.value.XP + xpChange
-      }, and HP: ${selectedChoices.value.HP + hpChange}....`
-    );
-  }
-  if (type === "storyPath") {
-    selectedChoices.value.storyPath = choice;
-    xpChange = Math.floor(Math.random() * 4) + 1; // 1~4点经验值
-    hpChange = -Math.floor(Math.random() * 3); // 0~2点生命值减少
-    await requestStoryPart(
-      `A Monster Appears! I decide to ${choice}, My XP increase to ${
-        selectedChoices.value.XP + xpChange
-      }, but HP drops to ${selectedChoices.value.HP + hpChange}.`
-    );
-  }
-
-  // 更新状态
-  selectedChoices.value.XP += xpChange;
-  selectedChoices.value.HP += hpChange;
-
-  // 检查提前结束条件
-  if (selectedChoices.value.HP <= 0) {
-    console.log("Adventure ends early due to HP depletion.");
-    setTimeout(async () => {
-      await requestStoryEnding(); // 提前结束冒险
-    }, 3000); // 延时 3 秒
-  } else if (currentStep.value === 3) {
-    console.log("Adventure reaches normal ending.");
-    setTimeout(async () => {
-      await requestStoryEnding(); // 正常结束冒险
-    }, 3000); // 延时 3 秒
   }
 };
 
-// 请求接口生成故事片段
-const requestStoryPart = async (newPrompt: string) => {
-  const previousStory = storyParts.value.map((part) => part.story).join(" ");
-  const prompt = `${initialPrompt}\n\n${previousStory}\n\n${newPrompt}`.trim();
+// 提交语音输入
+const handleSpeechSubmit = async (speech: string) => {
+  // 调用接口生成下半段故事
+  await requestStoryPart2(speech);
+};
+
+// 请求接口生成故事上半段
+const requestStoryPart1 = async () => {
+  const { character, scene } = selectedChoices.value;
+  const prompt =
+    `${initialPromptPart1}\n\nCharacter: ${character}\nScene: ${scene}\n\nStart the story:`.trim();
 
   // 添加一个新的加载占位符
   storyParts.value.push({
@@ -129,18 +85,19 @@ const requestStoryPart = async (newPrompt: string) => {
   });
 
   try {
-    const part = await generateStory(prompt);
-    if (part && part.trim()) {
-      const imagePrompt = `${initialImagePrompt}\n\n${part}`.trim();
+    const part1 = await generateStory(prompt);
+    if (part1 && part1.trim()) {
+      const imagePrompt = `${initialImagePrompt}\n\n${part1}`.trim();
       const imageUrl =
         (await flux_generateImage(imagePrompt)) ||
         "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
       storyParts.value[storyParts.value.length - 1] = {
-        story: part,
+        story: part1,
         imageUrl,
         isFinal: false,
         isLoading: false,
       };
+      isStoryPart1Loaded.value = true; // 设置加载完成
     } else {
       storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
     }
@@ -149,21 +106,13 @@ const requestStoryPart = async (newPrompt: string) => {
   }
 };
 
-const requestStoryEnding = async () => {
-  const { XP, HP } = selectedChoices.value;
+// 请求接口生成故事下半段
+const requestStoryPart2 = async (spell: string) => {
   const previousStory = storyParts.value.map((part) => part.story).join(" ");
-  let endingPrompt = `${initialPrompt}\n\n${previousStory}\n\n`;
+  const prompt =
+    `${initialPromptPart2}\n\nPrevious Story:\n${previousStory}\n\nUser's Spell: ${spell}\n\nContinue and conclude the story:`.trim();
 
-  if (HP <= 0) {
-    endingPrompt += `With HP: ${HP}, the character collapses but learns an important lesson for next time. Conclude with a humorous twist ending.`;
-  } else if (XP > 7 && HP > 7) {
-    endingPrompt += `The character triumphs with XP: ${XP} and HP: ${HP}. A heroic and satisfying ending unfolds!`;
-  } else if (XP < 5 && HP > 5) {
-    endingPrompt += `Though lacking in XP (${XP}), the character's resilience (HP: ${HP}) leads to a warm and reflective ending.`;
-  } else {
-    endingPrompt += `With balanced XP: ${XP} and HP: ${HP}, the character completes their adventure with mixed results, but a positive spirit!`;
-  }
-
+  // 添加一个新的加载占位符
   storyParts.value.push({
     story: "",
     imageUrl: "",
@@ -172,18 +121,20 @@ const requestStoryEnding = async () => {
   });
 
   try {
-    const ending = await generateStory(endingPrompt);
-    if (ending && ending.trim()) {
-      const imagePrompt = `${initialImagePrompt}\n\n${ending}`.trim();
+    const part2 = await generateStory(prompt);
+    if (part2 && part2.trim()) {
+      const imagePrompt = `${initialImagePrompt}\n\n${part2}`.trim();
       const imageUrl =
         (await flux_generateImage(imagePrompt)) ||
         "https://cdn.midjourney.com/acbe5e94-1b3e-4efc-816d-32fbb920519b/0_0.png";
       storyParts.value[storyParts.value.length - 1] = {
-        story: ending,
+        story: part2,
         imageUrl,
         isFinal: true,
         isLoading: false,
       };
+    } else {
+      storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
     }
   } catch (error) {
     storyParts.value[storyParts.value.length - 1].isLoading = false; // 停止加载
@@ -233,7 +184,7 @@ watch(storyParts, () => {
         :selectedChoices="selectedChoices"
         :error="error"
         @select="handleSelection"
-        @nextStep="proceedToNextStep"
+        @submitSpeech="handleSpeechSubmit"
       />
 
       <!-- 右侧故事内容显示栏 -->
@@ -254,6 +205,8 @@ watch(storyParts, () => {
   </div>
 </template>
 
+<style scoped>
+/* 样式保
 <style scoped>
 /* 整体容器样式 */
 .story-app {
