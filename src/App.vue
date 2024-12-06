@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import StoryCreator from './components/StoryCreator.vue'
+import StoryCreator from "./components/StoryCreator.vue";
 </script>
 
 <template>
@@ -8,7 +8,11 @@ import StoryCreator from './components/StoryCreator.vue'
 
 <style>
 #app {
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 </style>

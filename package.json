@@ -9,8 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-vue": "^0.5.1",
+    "crypto-js": "^4.2.0",
+    "howler": "^2.2.4",
     "markdown-it": "^14.1.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.41.0",
     "openai": "^4.28.0",
+    "recorder-core": "^1.3.24102001",
+    "recorder-js": "^1.0.7",
     "vue": "^3.4.38",
     "vue3-markdown-it": "^1.0.10"
   },
